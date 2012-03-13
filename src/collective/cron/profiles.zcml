@@ -1,0 +1,13 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.cron">
+  <genericsetup:registerProfile
+      name="default"
+      title="collective.cron"
+      directory="profiles/default"
+      description='Extension profile fr the "collective.cron" Plone product.'
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+    />
+
+</configure>

@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<object name="portal_skins" allow_any="False" cookie_persistence="False"
+    default_skin="collective.cron">
+ <object name="ccron_custom_templates"
+    meta_type="Filesystem Directory View"
+    directory="collective.cron:skins/ccron_custom_templates"/>
+<skin-path name="collective.cron" based-on="Sunburst Theme">
+  <layer name="collective.cron_styles"
+     insert-after="ccron_custom_templates"/>
+ </skin-path>
+</object>

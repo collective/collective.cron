@@ -1,0 +1,27 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:grok="http://namespaces.zope.org/grok"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.cron">
+  <five:registerPackage package="." initialize=".initialize" />
+  <i18n:registerTranslations directory="locales" />
+  <include package="collective.autopermission" />
+  <permission id="ccron.View" title="ccron: View"/>
+  <permission id="ccron.Edit" title="ccron: Edit"/>
+  <include package=".browser" />
+  <include package=".adapters" />
+  <include file="skins.zcml" />
+  <includeDependencies package="." />
+  <include file="profiles.zcml" />
+  <genericsetup:importStep
+      name="collective.cron setupVarious"
+      title="various setup for collective.cron"
+      description="various setup for collective.cron"
+      handler="collective.cron.setuphandlers.setupVarious">
+    <depends name="content"/>
+  </genericsetup:importStep>
+  <grok:grok package="." />
+</configure>

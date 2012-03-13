@@ -1,0 +1,96 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2011-08-26 09:38+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI +ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+"Language-Code: en\n"
+"Language-Name: English\n"
+"Preferred-Encodings: utf-8 latin1\n"
+"Domain: DOMAIN\n"
+
+#: ./interfaces.py:27
+msgid "Activated"
+msgstr ""
+
+#: ./interfaces.py:47
+msgid "Async Service"
+msgstr ""
+
+#: ./interfaces.py:28
+msgid "How to repeat the job (CRON format)"
+msgstr ""
+
+#: ./adapters/manager.py:221
+msgid "Job activated"
+msgstr ""
+
+#: ./adapters/manager.py:239
+msgid "Job deactivated"
+msgstr ""
+
+#: ./adapters/manager.py:224
+msgid "Job failed to be deactivated: ${ex}"
+msgstr ""
+
+#: ./adapters/manager.py:206
+msgid "Job failed to be queued: ${ex}"
+msgstr ""
+
+#: ./adapters/manager.py:203
+msgid "Job queued"
+msgstr ""
+
+#: ./interfaces.py:48
+msgid "Jobs queue"
+msgstr ""
+
+#: ./content/backend_templates/view.pt:25
+msgid "Last run on :"
+msgstr ""
+
+#: ./content/backend_templates/view.pt:31
+msgid "Last status:"
+msgstr ""
+
+#: ./content/backend.py:172
+msgid "NOW"
+msgstr ""
+
+#: ./content/backend_templates/view.pt:20
+msgid "Periodicity :"
+msgstr ""
+
+#: ./interfaces.py:18
+msgid "Status"
+msgstr ""
+
+#: ./content/backend_templates/view.pt:16
+msgid "Status :"
+msgstr ""
+
+#: ./content/backend.py:90
+msgid "The cron is not valid."
+msgstr ""
+
+#: ./interfaces.py:17
+msgid "The result date"
+msgstr ""
+
+#: ./content/backend_templates/view.pt:41
+msgid "Will run now on :"
+msgstr ""
+
+#: ./interfaces.py:22
+msgid "error"
+msgstr ""
+
+#: ./interfaces.py:19
+msgid "errors"
+msgstr ""
+

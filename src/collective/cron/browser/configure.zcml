@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="collective.cron">
+
+  <!-- ' collective.cron' Zope 3 browser layer -->
+  <interface
+      interface=".interfaces.IThemeSpecific"
+      type="zope.publisher.interfaces.browser.IBrowserSkinType"
+      name="collective.cron"
+    />
+
+  <!-- Viewlets registration -->
+  <!-- Zope 3 browser resources -->
+  <!-- vim:set ft=xml: -->
+</configure>
