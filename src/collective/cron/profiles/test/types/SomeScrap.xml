@@ -11,9 +11,9 @@
   <property name="filter_content_types">False</property>
   <property name="allowed_content_types"> </property>
   <property name="allow_discussion">False</property>
-  <property name="schema">plone.app.cron.tests.backend.ISomeScrap</property>
-  <property name="klass">plone.app.cron.tests.backend.SomeScrap</property>
-  <property name="add_permission">pacron.Edit</property>
+  <property name="schema">collective.cron.tests.backend.ISomeScrap</property>
+  <property name="klass">collective.cron.tests.backend.SomeScrap</property>
+  <property name="add_permission">ccron.Edit</property>
   <property name="behaviors">
     <element value="plone.app.content.interfaces.INameFromTitle" />
     <element value="plone.app.dexterity.behaviors.metadata.IBasic"/>
@@ -32,10 +32,10 @@
   <!-- Actions -->
   <action title="View" action_id="view" category="object" condition_expr=""
       url_expr="string:${object_url}/" visible="True">
-    <permission value="pacron: View" />
+    <permission value="ccron: View" />
   </action>
   <action title="Edit" action_id="edit" category="object" condition_expr=""
       url_expr="string:${object_url}/edit" visible="True">
-    <permission value="pacron: Edit" />
+    <permission value="ccron: Edit" />
   </action>
 </object>

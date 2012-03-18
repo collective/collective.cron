@@ -4,7 +4,7 @@
   xmlns:i18n="http://xml.zope.org/namespaces/i18n"
   lang="en"
   metal:use-macro="context/main_template/macros/master"
-  i18n:domain="plone.app.cron">
+  i18n:domain="collective.cron">
   <body>
     <metal:main fill-slot="main">
       <tal:main-macro metal:define-macro="main"

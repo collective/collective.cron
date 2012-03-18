@@ -94,7 +94,7 @@ class QueueTest(base.TestCase):
         infos = IAnnotations(queue)
         self.assertEquals(
             infos,
-            {'pacron.adapters.manager': {'plone': [('unnamed', '/plone')]}}
+            {'ccron.adapters.manager': {'plone': [('unnamed', '/plone')]}}
         )
 
     def test_startup_relaunch(self):

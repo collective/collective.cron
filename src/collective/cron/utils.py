@@ -14,7 +14,6 @@ from AccessControl.SecurityManagement import newSecurityManager
 from zope.testbrowser import browser
 
 from croniter import croniter as baseT
-from lxml.html import document_fromstring
 
 D = os.path.dirname
 J = os.path.join
@@ -50,6 +49,7 @@ class Browser(browser.Browser):
 
 def get_tree(h):
     """h can be either a zc.testbrowser.Browser or a string."""
+    from lxml.html import document_fromstring
     if isinstance(h, file):
         h = h.read()
     if not isinstance(h, basestring):

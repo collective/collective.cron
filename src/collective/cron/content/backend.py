@@ -23,7 +23,7 @@ from plone.directives import form, dexterity
 from collective.cron.config import MANAGE_KEY, RESULTS_FOLDER
 from collective.cron import events as e
 from collective.cron import interfaces as i
-from collective.cron.cron import MessageFactory as _
+from collective.cron import MessageFactory as _
 from collective.cron.utils import croniter, to_utc, su_plone
 
 from Products.CMFCore.utils import getToolByName
@@ -109,7 +109,7 @@ def registerOnRestart(event):
     queue = event.object
     conn = queue._p_jar.root()
     dbs = queue._p_jar.db().databases
-    log = logging.getLogger('pacron.registerOnRestart')
+    log = logging.getLogger('ccron.registerOnRestart')
     infos = None
     current_user = None
     scontext = getSecurityManager()
@@ -155,7 +155,7 @@ def registerOnRestart(event):
 
 class View(dexterity.DisplayForm):
     grok.context(i.IBackend)
-    grok.require('pacron.View')
+    grok.require('ccron.View')
 
     def has_logs(self):
         c = self.context

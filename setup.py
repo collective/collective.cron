@@ -10,10 +10,9 @@ def read(*rnames):
     ).read()
 
 long_description = "\n\n".join(
-    [read('README.txt'),
-     read('CHANGES.txt'),
+    [read('README.rst'),
      read('docs', 'INSTALL.txt'),
-     read('docs', 'HISTORY.txt'),
+     read('docs', 'CHANGES.rst'),
     ]
 )
 
@@ -37,20 +36,28 @@ setup(
     packages=find_packages('src'),
     package_dir = {'': 'src'},
     include_package_data=True,
+    extras_require = {
+        'test': [
+            'collective.testcaselayer',
+            'Products.PloneTestCase',
+        ],
+    },
     install_requires=[
         'collective.autopermission',
-        'collective.testcaselayer',
+        'simplejson', 'demjson', # for zc.async
         'croniter',
         'five.grok',
-        'lxml',
         'mocker',
         'plone.app.async',
         'plone.app.dexterity',
+        'zope.keyreference',
         'pytz',
+        'z3c.autoinclude',
         # -*- Extra requirements: -*-
     ],
     entry_points="""
-    # -*- Entry points: -*-
+    [z3c.autoinclude.plugin]
+    target = plone
     """,
 )
 # vim:set ft=python:

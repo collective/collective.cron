@@ -19,7 +19,7 @@ class Layer(AsyncLayer):
             self[key] = value
 
     def afterSetUp(self):
-        """Set up the additional products required for the plone.app.cron) site policy.
+        """Set up the additional products required for the collective.cron) site policy.
         until the setup of the Plone site testing layer.
         """
         for product in TESTED_PRODUCTS:
@@ -40,27 +40,20 @@ class Layer(AsyncLayer):
         self.loadZCML('configure.zcml', package=plone.directives.form)
         import plone.z3cform
         self.loadZCML('configure.zcml', package=plone.z3cform)
-    #with_ploneproduct_ploneappblob
-        import plone.app.blob
-        self.loadZCML('configure.zcml', package=plone.app.blob)
-
         # ------------------------------------------------------------------------------------
         # - Load the python packages that are registered as Zope2 Products via Five
         #   which can't happen until we have loaded the package ZCML.
         # ------------------------------------------------------------------------------------
 
-        #with_ploneproduct_ploneappblob
-        ztc.installPackage('plone.app.blob')
-
         # ------------------------------------------------------------------------------------
         # Load our own policy
         # ------------------------------------------------------------------------------------
-        ztc.installPackage('plone.app.cron')
-        import plone.app.cron
-        self.loadZCML('configure.zcml', package=plone.app.cron)
-        self.loadZCML('test.zcml', package=plone.app.cron)
-        self.addProfile('plone.app.cron:default')
-        self.addProfile('plone.app.cron:test')
+        ztc.installPackage('collective.cron')
+        import collective.cron
+        self.loadZCML('configure.zcml', package=collective.cron)
+        self.loadZCML('test.zcml', package=collective.cron)
+        self.addProfile('collective.cron:default')
+        self.addProfile('collective.cron:test')
 
         # ------------------------------------------------------------------------------------
         # support for sessions without invalidreferences if using zeo temp storage

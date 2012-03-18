@@ -9,5 +9,4 @@
       description='Extension profile fr the "collective.cron" Plone product.'
       provides="Products.GenericSetup.interfaces.EXTENSION"
     />
-
 </configure>

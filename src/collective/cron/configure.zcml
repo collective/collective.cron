@@ -6,14 +6,18 @@
     xmlns:cmf="http://namespaces.zope.org/cmf"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     i18n_domain="collective.cron">
+  <include package="collective.autopermission" />
+  <include package="plone.app.async"/> 
   <five:registerPackage package="." initialize=".initialize" />
   <i18n:registerTranslations directory="locales" />
-  <include package="collective.autopermission" />
   <permission id="ccron.View" title="ccron: View"/>
   <permission id="ccron.Edit" title="ccron: Edit"/>
   <include package=".browser" />
   <include package=".adapters" />
   <include file="skins.zcml" />
+  <!--
+    <include file="test.zcml" />
+    -->
   <includeDependencies package="." />
   <include file="profiles.zcml" />
   <genericsetup:importStep

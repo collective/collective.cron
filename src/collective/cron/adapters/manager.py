@@ -23,7 +23,7 @@ from Products.statusmessages.interfaces import IStatusMessage
 from collective.cron import interfaces as i
 from collective.cron import events as e
 from collective.cron.config import MANAGE_KEY
-from collective.cron.cron import MessageFactory as _
+from collective.cron import MessageFactory as _
 
 def runJob(backend, *args, **kwargs):
     logger = logging.getLogger('backend/runJob')
@@ -62,11 +62,11 @@ class BackendJobManager(grok.Adapter):
     def queue(self):
         return self.async.getQueues()['']
 
-    def get_job_infos(self):
+    def get_job_infos(self, begin_after=None):
         job_infos = {'job': runJob,
                      'context':self.context,
-                     'begin_after': None,
                      'args': (),
+                     'begin_after': begin_after,
                      'kwargs': {}}
         return job_infos
 
@@ -77,10 +77,8 @@ class BackendJobManager(grok.Adapter):
         logger = logging.getLogger('backend/register_job')
         logger.debug('Register job: %s' % backend.title)
         #schedule_time = datetime.datetime.now(pytz.UTC) + datetime.timedelta(seconds=10)# test values: execute each 10 seconds
-        job_infos = self.get_job_infos()
-        schedule_time = begin_after
-        job_infos['begin_after'] = schedule_time
-        if (schedule_time is not None) or force:
+        job_infos = self.get_job_infos(begin_after)
+        if (begin_after is not None) or force:
             j = self.get_job_present()
             if j is not None:
                 remove = False
@@ -89,47 +87,50 @@ class BackendJobManager(grok.Adapter):
                 # either renew the job if the schedule time is prior to the previous scheduled one
                 # or renew jobs that are pending and not executed so just zombies
                 elif isinstance(j.begin_after, datetime.datetime):
-                    if ((j.begin_after >= schedule_time)
+                    if ((j.begin_after >= begin_after)
                         or ((j.begin_after < now) and (j.status == zai.PENDING))):
                         remove = True
                 else:
                     remove = True
                 if remove:
                     self.remove_jobs(job_infos)
-        # unqueue the job if we have a more precise start time
-        if ((not self.is_job_present()) and backend.activated):
-            self.log.debug('Registring a new job: %s' % repr(job_infos))
+        if ((not self.is_job_present())
+            and ((begin_after is not None) or force)
+            and backend.activated):
+            msg = 'Registring a new job: %s' % repr(job_infos)
+            if begin_after:
+                msg += ' | schedule time: %s' % begin_after
+            self.log.debug(msg)
             self.mark_queue_plonesite_aware()
-            scheduled = job_infos['begin_after'] is not None
-            # either triggered to be run now
-            if not scheduled and (force==True):
-                job = self.async.queueJob(
-                    job_infos['job'],
-                    job_infos['context'],
-                    *job_infos['args'],
-                    **job_infos['kwargs']
-                )
-            #,or scheduled at a specific time
-            elif scheduled:
-                job = self.async.queueDeferredJob(
-                    job_infos['job'],
-                    job_infos['begin_after'],
-                    job_infos['context'],
-                    *job_infos['args'],
-                    **job_infos['kwargs'])
+            # queue the job
+            job = self.async.queueJob(
+                job_infos['job'],
+                job_infos['context'],
+                *job_infos['args'],
+                **job_infos['kwargs']
+            )
+            # or scheduled at a specific time
+            # we need to reschedule it more precisely
+            # after p.a.async wrapped it
+            if begin_after:
+                queue = job.queue
+                queue.remove(job)
+                job.begin_after = begin_after
+                queue.put(job)
         job = self.get_job_present(job_infos)
         return job
 
     def compare_job(self, job, job_infos):
         if job_infos is None:
-            job_infos = self.get_job_infos()
+            job_infos = self.get_job_infos(job.begin_after)
         #args0 is the context physical path
         if job.callable == _executeAsUser:
             same_path = job_infos['context'].getPhysicalPath() == job.args[0]
             same_job = job_infos['job'] == job.args[4]
-            same_kw = job_infos['kwargs'] == job.kwargs
             same_args = job_infos['args'] == tuple(job.args[5:])
-            if same_path and same_job and same_args and same_kw:
+            same_kw = job_infos['kwargs'] == job.kwargs
+            same_ba = job_infos['begin_after'] == job.begin_after
+            if same_path and same_job and same_args and same_kw and same_ba:
                 return True
         return False
 
@@ -138,6 +139,7 @@ class BackendJobManager(grok.Adapter):
         if job_infos is None:
             job_infos = self.get_job_infos()
         for j in self.queue:
+            job_infos['begin_after'] = j.begin_after
             if self.compare_job(j, job_infos):
                 job = j
                 break
@@ -161,6 +163,7 @@ class BackendJobManager(grok.Adapter):
         if job_infos is None:
             job_infos = self.get_job_infos()
         for job in self.queue:
+            job_infos['begin_after'] = job.begin_after
             if self.compare_job(job, job_infos):
                 self.log.info('Removing this job : %s' % repr(job))
                 self.queue.remove(job)
@@ -171,11 +174,16 @@ class BackendJobManager(grok.Adapter):
         if backend.activated:
             # we maybe just actovated the job
             # starting a loop to make the cron
-            ret = i.IBackendJobManager(backend).register_job(begin_after=backend.next(), force=force)
+            ret = i.IBackendJobManager(
+                backend
+            ).register_job(
+                begin_after=backend.next(),
+                force=force)
         else:
             # we have deactivated the job or cancel the schedulation
             # remove the job from the queue !
-            ret = i.IBackendJobManager(backend).remove_jobs()
+            ret = i.IBackendJobManager(
+                backend).remove_jobs()
         return ret
 
     def mark_queue_plonesite_aware(self):

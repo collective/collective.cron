@@ -9,7 +9,7 @@
   <grok:grok package=".tests.backend"/>
   <genericsetup:registerProfile
       name="test"
-      title="collective.cron"
+      title="collective.cron tests"
       directory="profiles/test"
       description='Extension profile fr the "collective.cron" Plone product tests.'
       provides="Products.GenericSetup.interfaces.EXTENSION"
