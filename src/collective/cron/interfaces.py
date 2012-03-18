@@ -86,7 +86,7 @@ class IJobRunner(Interface):
     def run(self):
         """run the job."""
 
-class ICACRONUtils(Interface):
+class ICCRONUtils(Interface):
     """Backend log manager"""
     def log(date=None, status=u'OK', errors=None):
         """log a result on a results folder stocked on the context"""
@@ -98,7 +98,7 @@ class IBackendTitleCompl(Interface):
     def getTitleCompl():
         """get the title complement."""
 
-class ICACRONContent(Interface):
+class ICCRONContent(Interface):
     """Marker interface for gmb content types"""
 
 

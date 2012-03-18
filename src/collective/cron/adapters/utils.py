@@ -6,8 +6,8 @@ from five import grok
 from collective.cron import interfaces as i
 
 class CACRONUtils(grok.Adapter):
-    grok.provides(i.ICACRONUtils)
-    grok.context(i.ICACRONContent)
+    grok.provides(i.ICCRONUtils)
+    grok.context(i.ICCRONContent)
 
     def log(self, date=None, status=u'OK', errors=None):
         if not date: date = datetime.datetime.now()

@@ -42,7 +42,7 @@ def runJob(backend, *args, **kwargs):
     except Exception, ex:
         errors.append('%s' % ex)
         status = 'FAILED'
-    i.ICACRONUtils(backend).log(status=status, errors=errors)
+    i.ICCRONUtils(backend).log(status=status, errors=errors)
     notify(e.BackendFinnishedJobEvent(backend, status))
     return status, bpath
 

@@ -31,9 +31,9 @@ from Products.CMFCore.utils import getToolByName
 class CronFormatError(schema.ValidationError): pass
 class Backend(Container):
     """Base MixIn for backends"""
-    implements((i.IBackend, i.ICACRONContent))
+    implements((i.IBackend, i.ICCRONContent))
     def results_folder(self):
-      return i.ICACRONUtils(self).getFolder(RESULTS_FOLDER, 'Results')
+      return i.ICCRONUtils(self).getFolder(RESULTS_FOLDER, 'Results')
 
     def getResults(self):
         folder = self.results_folder()

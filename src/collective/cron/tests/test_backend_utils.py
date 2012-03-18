@@ -16,7 +16,7 @@ class BackendTest(base.TestCase):
     def test_log(self):
         g = self.g
         now = datetime.datetime(2011, 2, 7, 21, 58, 14, 884758)
-        i.ICACRONUtils(g).log(now, errors=[u'foo'])
+        i.ICCRONUtils(g).log(now, errors=[u'foo'])
         res = g.getResults()[0].getObject()
         self.assertEquals(
             [getattr(res, aaa)
