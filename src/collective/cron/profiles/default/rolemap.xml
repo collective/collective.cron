@@ -13,11 +13,11 @@
     </permission>
     <permission name="ccron: Edit" acquire="True">
       <role name="CollectiveCron"/>
+      <role name="CollectiveCronRO"/>
       <role name="Manager"/>
       <role name="Owner"/>
     </permission>
     <permission name="ccron: View" acquire="True">
-      <role name="CollectiveCron"/>
       <role name="CollectiveCronRO"/>
       <role name="Manager"/>
       <role name="Owner"/>

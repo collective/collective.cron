@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <object name="SomeScrap"
     meta_type="Dexterity FTI"
-    i18n:domain="getmybill.skin"
+    i18n:domain="collective.cron"
     xmlns:i18n="http://xml.zope.org/namespaces/i18n">
   <!-- Basic metadata -->
   <property name="title" i18n:translate="">Some Scrapping</property>

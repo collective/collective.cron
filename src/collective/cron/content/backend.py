@@ -29,9 +29,10 @@ from collective.cron.utils import croniter, to_utc, su_plone
 from Products.CMFCore.utils import getToolByName
 
 class CronFormatError(schema.ValidationError): pass
+
 class Backend(Container):
     """Base MixIn for backends"""
-    implements((i.IBackend, i.ICCRONContent))
+    implements((i.IBackend, i.ICCRONContent, ))
     def results_folder(self):
       return i.ICCRONUtils(self).getFolder(RESULTS_FOLDER, 'Results')
 

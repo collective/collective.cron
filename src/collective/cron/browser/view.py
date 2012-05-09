@@ -14,10 +14,10 @@ from Products.CMFCore.Expression import getExprContext
 
 from collective.cron import interfaces as i
 
-class cron_dashboard_link(grok.Viewlet):
-    grok.viewletmanager(IPortalHeader)
-    grok.context(IPloneSiteRoot)
-
+#class cron_dashboard_link(grok.Viewlet):
+#    grok.viewletmanager(IPortalHeader)
+#    grok.context(IPloneSiteRoot)
+#
 class cron_dashboard(grok.View):
     grok.name('ccron_dashboard')
     grok.context(IPloneSiteRoot)
