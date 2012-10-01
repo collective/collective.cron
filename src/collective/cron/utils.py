@@ -22,12 +22,19 @@ FF2_USERAGENT =  'Mozilla/5.0 (Windows; U; Windows NT 5.1; fr; rv:1.8.1.14) Geck
 FF3_USERAGENT =  'Mozilla/5.0 (X11; U; Linux x86_64; fr; rv:1.9.2.15) Gecko/20110308 Fedora/3.6.15-1.fc14 Firefox/3.6.15'
 
 class croniter(baseT):
-    def get_next(self, ret_type=datetime.datetime):
+    def get_next(self, ret_type=None):
+        if ret_type is None:
+            ret_type = datetime.datetime
         return self._get_next(ret_type, is_prev=False)
 
 class NoSuchUserError(Exception):pass
 
-def which(program, environ=None, key = 'PATH', split = ':'):
+def splitstrip(value):
+    return [a.strip()
+            for a in value.split()
+            if a.strip()]
+
+def which(program, environ=None, key = 'PATH', split = ':'): # pragma: no cover
     if not environ:
         environ = os.environ
     PATH=environ.get(key, '').split(split)
@@ -39,7 +46,7 @@ def which(program, environ=None, key = 'PATH', split = ':'):
             return fp+'.exe'
     raise IOError('Program not fond: %s in %s ' % (program, PATH))
 
-class Browser(browser.Browser):
+class Browser(browser.Browser): # pragma: no cover
     def __init__(self, url=None, mech_browser=None):
         browser.Browser.__init__(self, url, mech_browser)
         self.mech_browser.set_handle_robots(False)
@@ -47,7 +54,7 @@ class Browser(browser.Browser):
         if url is not None:
             self.open(url)
 
-def get_tree(h):
+def get_tree(h): # pragma: no cover
     """h can be either a zc.testbrowser.Browser or a string."""
     from lxml.html import document_fromstring
     if isinstance(h, file):
@@ -72,24 +79,30 @@ Content-Length: %d
 %s
 
 """
-def set_file_content(atfile, data, filename=None):
+def set_file_content(atfile, data, filename=None): # pragma: no cover
     mutator = atfile.getField('file').getMutator(atfile)
     mutator(data)
 
-def to_utc(d):
+
+def to_tz(d, tz):
     """
-    convert to a timestamp, then reconvert to a non naive UTC datetime"""
-    ud = None
-    if d.tzinfo is not None:
-        if d.tzinfo == pytz.UTC:
-            ud = d
-    if ud is None:
-        ts = time.mktime(d.timetuple())
+    convert to a timestamp from any datetime naive or not
+    to the destination timezone """
+    ud = d
+    # try to convert naive datetime to UTC
+    if ud.tzinfo is None:
+        ts = time.mktime(ud.timetuple())
         ud = datetime.datetime.utcfromtimestamp(
             ts).replace(tzinfo=pytz.UTC)
+    # if this is a non naive datetime just convert to the destination tz
+    if ud.tzinfo is not None:
+        ud = ud.astimezone(tz)
     return ud
 
-def to_local(d):
+def to_utc(d):
+    return to_tz(d, pytz.UTC)
+
+def to_local(d): # pragma: no cover
     """
     convert to a timestamp, then reconvert to a naive local datetime"""
     ud = None
@@ -111,7 +124,7 @@ def su_plone(app, plone, userids=None):
         try:
             user = plone.acl_users.getUser(u)
             break
-        except:
+        except: # pragma: no cover
             log.info('No user matching %s in %s' % (
                 user, '/'.join(plone.getPhysicalPath()))
             )
@@ -120,7 +133,7 @@ def su_plone(app, plone, userids=None):
             try:
                 user = app.acl_users.getUser(u)
                 break
-            except:
+            except: # pragma: no cover
                 log.info('No user matching %s in /' % (
                     user, '/'.join(plone.getPhysicalPath()))
                 )
@@ -132,11 +145,11 @@ def su_plone(app, plone, userids=None):
         )
     return user
 
-def remove_path(path):
+def remove_path(path): # pragma: no cover
     """Remove a path."""
     if os.path.exists(path):
         if os.path.islink(path):
-            os.unlink(path) 
+            os.unlink(path)
         elif os.path.isfile(path):
             os.unlink(path)
         elif os.path.isdir(path):
@@ -146,6 +159,23 @@ def remove_path(path):
     else:
         print
         print "'%s' was asked to be deleted but does not exists." % path
-        print 
+        print
+
+def asbool(value):
+    if isinstance(value, basestring):
+        value = value.lower()
+        for t in 'on', 'yes', 'true', '1':
+            if t in value:
+                return True
+        for t in 'off', 'no', 'false', '0':
+            if t in value:
+                return False
+        if value in ['t', 'y']:
+            return True
+        if value in ['n', 'f']:
+            return False
+    if value == -1:
+        return False
+    return bool(value)
 
 # vim:set et sts=4 ts=4 tw=80:

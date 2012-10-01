@@ -1,75 +1,69 @@
 import pytz
 import datetime
-
-from zope import schema
-from zope.interface import implements
-from five import grok
-from zope.component import getUtility
 import transaction
+#from zc.async.testing import set_now, setUpDatetime, tearDownDatetime
+from collective.cron.testing import set_now, setUpDatetime, tearDownDatetime
+from collective.cron import crontab
+from collective.cron.adapters import (
+    manager,
+    utils as autils,
+)
 
-from Products.PloneTestCase import PloneTestCase as ptc
-from Products.CMFCore.utils import getToolByName
+import unittest2 as unittest
 
-from zc.async.testing import set_now, setUpDatetime, tearDownDatetime
+from collective.cron.testing import (
+    COLLECTIVE_CRON_SIMPLE,
+    COLLECTIVE_CRON_FIXTURE as UNIT_TESTING,
+    COLLECTIVE_CRON_INTEGRATION_TESTING as INTEGRATION_TESTING,
+    COLLECTIVE_CRON_FUNCTIONAL_TESTING as FUNCTIONAL_TESTING,
+    COLLECTIVE_CRON_SELENIUM_TESTING as SELENIUM_TESTING,
+)
 
-from plone.app.async.interfaces import IAsyncService
-from plone.app.async.testing import AsyncSandbox
+from plone.app.async.tests import base
+from plone.testing.z2 import Browser
 
-from collective.cron.tests.layer import layer
-from collective.cron.tests.backend import SomeJobRunner
 
-class BaseTestCase(ptc.PloneTestCase):
-    """We use this base class for all the tests in this package.
-    If necessary, we can put common utility or setup code in here.
-    """
-    layer = layer
-
-class FunctionalTestCase(ptc.FunctionalTestCase):
-    """Functionnal base TestCase."""
-    layer = layer
-
-class SandboxedTestCase(AsyncSandbox, BaseTestCase):
+class TestCase(base.AsyncTestCase):
+    layer = UNIT_TESTING
     def setUp(self):
-        BaseTestCase.setUp(self)
-
-    def tearDown(self):
-        BaseTestCase.tearDown(self)
-
-    def afterSetUp(self):
-        AsyncSandbox.afterSetUp(self)
-        BaseTestCase.afterSetUp(self)
-
-    def afterClear(self):
-        AsyncSandbox.afterClear(self)
-        BaseTestCase.afterClear(self)
-
-
-class TestCase(SandboxedTestCase):
-    def setUp(self):
-        BaseTestCase.setUp(self)
+        super(TestCase, self).setUp()
         setUpDatetime()
         self.setRoles(['CollectiveCron'])
-        setattr(SomeJobRunner, '_old_run', getattr(SomeJobRunner, 'run'))
-        def run(klass):
-            """."""
-            return ['foo']
-        setattr(SomeJobRunner, 'run', run)
-        self.async = getUtility(IAsyncService)
-        self.queue = self.async.getQueues()['']
-        self.folder.invokeFactory('SomeScrap', 'g')
-        self.assertEquals( len(self.queue), 0)
-        self.g = self.folder['g']
-        self.g.activated = True
-        self.g.periodicity = '%s * * * * *' %','.join([repr(a) for a in  range(0,60)])
-        self.async = getUtility(IAsyncService)
-        self.queue = self.async.getQueues()['']
+        self.queue = self.layer['queue']
         set_now(datetime.datetime(2008, 1, 1, 1, 1, tzinfo=pytz.UTC))
         transaction.commit()
 
     def tearDown(self):
-        self.folder.manage_delObjects(['g'])
-        noecho = [self.queue.remove(j) for j in self.queue]
+        noecho = [self.queue.remove(j)
+                  for j in self.queue]
         tearDownDatetime()
-        BaseTestCase.tearDown(self)
+        super(TestCase, self).tearDown()
 
+class SimpleTestCase(TestCase):
+    layer = COLLECTIVE_CRON_SIMPLE
+    def setUp(self):
+        setUpDatetime()
+        set_now(datetime.datetime(2008, 1, 1, 1, 1, tzinfo=pytz.UTC))
+
+    def tearDown(self):
+        tearDownDatetime()
+
+class IntegrationTestCase(TestCase):
+    """Integration base TestCase."""
+    layer = INTEGRATION_TESTING
+    def setUp(self):
+        TestCase.setUp(self)
+        self.crontab = self.layer['crontab']
+        self.cron = self.layer['cron']
+        self.crontab_manager = self.layer['crontab_manager']
+        self.cron_manager = self.layer['cron_manager']
+        self.cron_utils = self.layer['cron_utils']
+
+class FunctionalTestCase(IntegrationTestCase):
+    """Functionnal base TestCase."""
+    layer = FUNCTIONAL_TESTING
+
+class SeleniumTestCase(TestCase):
+    """Functionnal base TestCase."""
+    layer = SELENIUM_TESTING
 # vim:set et sts=4 ts=4 tw=80:

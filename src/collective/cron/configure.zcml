@@ -7,7 +7,7 @@
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     i18n_domain="collective.cron">
   <include package="collective.autopermission" />
-  <include package="plone.app.async"/> 
+  <include package="plone.app.async"/>
   <five:registerPackage package="." initialize=".initialize" />
   <i18n:registerTranslations directory="locales" />
   <permission id="ccron.View" title="ccron: View"/>
@@ -21,11 +21,23 @@
   <includeDependencies package="." />
   <include file="profiles.zcml" />
   <genericsetup:importStep
-      name="collective.cron setupVarious"
+      name="collective.cron.setupVarious"
       title="various setup for collective.cron"
       description="various setup for collective.cron"
       handler="collective.cron.setuphandlers.setupVarious">
     <depends name="content"/>
   </genericsetup:importStep>
-  <grok:grok package="." />
+  <genericsetup:importStep
+      name="collective.cron.setupCrons"
+      title="Imports crons"
+      description="Imports crons inside your plone site"
+      handler="collective.cron.setuphandlers.setupCrons">
+    <depends name="content"/>
+  </genericsetup:importStep>
+  <genericsetup:exportStep
+      name="collective.cron.exportCrons"
+      title="Exports crons"
+      description="Exports crons from your plone site"
+      handler="collective.cron.setuphandlers.exportCrons">
+  </genericsetup:exportStep>
 </configure>

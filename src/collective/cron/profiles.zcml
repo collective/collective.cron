@@ -9,4 +9,12 @@
       description='Extension profile fr the "collective.cron" Plone product.'
       provides="Products.GenericSetup.interfaces.EXTENSION"
     />
+  <genericsetup:registerProfile
+      name="uninstall "
+      title="collective.cron (uninstall)"
+      directory="profiles/uninstall"
+      description='Extension profile for the "collective.cron" Plone product uninstallation.'
+      provides="Products.GenericSetup.interfaces.EXTENSION"
+    /> 
+  <include package=".upgrades"/>
 </configure>

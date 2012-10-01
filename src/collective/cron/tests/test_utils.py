@@ -1,35 +1,62 @@
-import unittest
+import unittest2 as unittest
 import datetime
 from pytz import UTC, timezone
 from collective.cron.tests import base
-from collective.cron.utils import su_plone
-from collective.cron.utils import NoSuchUserError
-from collective.cron.utils import to_utc
+from collective.cron.utils import (
+    su_plone,
+    asbool,
+    NoSuchUserError,
+    splitstrip,
+    to_utc,
+)
 
-class UtilsTest(base.TestCase):
-    def test_suplone(self):
-        rf = self.g.results_folder()
+from collective.cron.adapters import utils as autils
+
+class UtilsTest(base.IntegrationTestCase):
+    def test_utils_suplone(self):
         acl = self.portal.acl_users
-        userid = acl.searchUsers()[0]['userid']
-        user = su_plone(self.app, self.portal, [userid])
-        self.assertEquals(user._login, 'test_user_1_')
-        user = su_plone(self.app, self.portal, ['portal_owner'])
-        self.assertEquals(user._login, 'portal_owner')
+        user = su_plone(self.app, self.portal, ['test-user'])
+        self.assertEquals(user._login, 'test-user')
+        user = su_plone(self.app, self.portal, ['Plone_manager'])
+        self.assertEquals(user._login, 'Plone_manager')
         self.assertRaises(
             NoSuchUserError, su_plone,
             self.app, self.portal, ['foo']
         )
+        user = su_plone(self.app, self.portal, ['test-user'])
 
-    def test_ToUtc(self):
-        dt = datetime.datetime
-        paris = timezone('Europe/Paris')
-        tests = [
-            (dt(2009, 1, 1, 1, 1, tzinfo=UTC),   dt(2009,1,1,1,1,tzinfo=UTC)),
-            (dt(2009, 1, 1, 1, 1),               dt(2009,1,1,0,1,tzinfo=UTC)),
-            (dt(2009, 1, 1, 1, 1, tzinfo=paris), dt(2009,1,1,0,1,tzinfo=UTC)),
-        ]
-        for orig, dest in tests:
-            self.assertEquals(to_utc(orig), dest)
+    def test_getfolder(self):
+        self.login('Plone_manager')
+        util = autils.CCRONUtils(self.portal, self.cron)
+        f1 = util.getFolder('foocron', 'Foo Cron')
+        SJ = '/'.join
+        self.assertEquals(f1.getId(), 'foocron')
+        self.assertEquals(f1.Title(), 'Foo Cron')
+        self.assertEquals(SJ(f1.getPhysicalPath()), '/plone/foocron')
+        f2 = util.getFolder('foocron', 'Foo Cron', f1)
+        self.assertEquals(f2.getId(), 'foocron')
+        self.assertEquals(f2.Title(), 'Foo Cron')
+        self.assertEquals(SJ(f2.getPhysicalPath()), '/plone/foocron/foocron')
+        self.logout()
+         
+
+class UtilsStest(base.SimpleTestCase):
+    def test_asboolt(self):
+        tests = {
+            False:(0, None, -1, '0', False, 
+                   'off', 'no', 'n', 'f', 'false',),
+            True: (1, True, 'y', 'yes', 
+                   'YES', 't', 'true', 'True', '1',)
+        }
+        for dest in tests:
+            for orig in tests[dest]:
+                self.assertEquals(
+                    asbool(orig), dest, repr(orig))
+
+    def test_splitstrip(self):
+        self.assertEquals(splitstrip("""a   
+                                     b   c"""), ["a", "b", "c"])
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

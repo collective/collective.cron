@@ -1,0 +1,100 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  lang="en"
+  metal:use-macro="context/prefs_main_template/macros/master"
+  i18n:domain="collective.cron">
+  <body>
+    <metal:main fill-slot="prefs_configlet_main"
+      tal:define="controlPanel python:modules['Products.CMFCore.utils'].getToolByName(here, 'portal_controlpanel');
+      crontab options/crontab;">
+      <h1 class="documentFirstHeading"
+        i18n:translate="heading_user_panel">
+        Crontab Preferences</h1>
+      <div class="documentDescription" i18n:translate="">
+        This area allows you to set crontab preferences.
+      </div>
+      <div id="content-core">
+        <a i18n:translate=""
+          tal:condition="python:not bool(len(crontab.crons))"
+          href="@@cron-settings/add">Add a task</a>
+        <form id="cron_toggle_form" method="POST"
+          tal:define="activated view/activated;
+          actstring python:activated and '0' or '1';"
+          tal:attributes="action string:@@cron-settings/crontab_toggle">
+          <a class="cronAction" i18n:translate="" href="#">
+            <tal:block tal:condition="not:activated">Activate the crontab</tal:block>
+            <tal:block tal:condition="activated">DE-Activate the crontab</tal:block>
+          </a>
+          <input type="hidden" name="activated"
+            tal:attributes="value actstring"/>
+          <script type="text/javascript">
+               $(function(){
+                 $('a.cronAction').each(function(i, elem) {
+                   $(elem).bind('click', function(evt) {
+                     $("#cron_toggle_form").submit();
+                     evt.preventDefault();
+                     return false;
+                   });
+                 });
+               });
+          </script>
+        </form>
+        <form method="POST"
+          tal:attributes="
+          action string:@@cron-settings/process_multiple">
+          <div class="tasks" tal:condition="python:bool(len(crontab.crons))">
+
+            <h2 i18n:translate="">Available & scheduled tasks</h2>
+            <a i18n:translate=""href="@@cron-settings/add"
+              style="display:block;margin-bottom:10px;border:none;">Add a task</a>
+            <table class="listing">
+              <thead>
+                <tr>
+                  <th i18n:translate="">Delete task</th>
+                  <th i18n:translate="">activated</th>
+                  <th i18n:translate="">name</th>
+                  <th i18n:translate="">user</th>
+                  <th i18n:translate="">periodicity</th>
+                  <th i18n:translate="">Next run</th>
+                  <th i18n:translate="">Last run</th>
+                  <th i18n:translate="">Last status</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tal:block tal:repeat="k crontab/crons">
+                  <tal:block tal:define="cron python:crontab.crons[k];
+                    uid cron/uid">
+                    <tr>
+                      <td>
+                        <input type="checkbox" name="uids_to_delete"
+                          tal:attributes="value uid"/>
+                      </td>
+                      <td><tal:block
+                        tal:content="python:cron.activated and 'yes' or 'no'"/></td>
+                      <td>
+                        <a
+                          tal:attributes="href string:@@cron-settings/cron_view?uid=${uid}">
+                          <tal:block tal:content="cron/name"/>
+                        </a>
+                      </td>
+                      <td><tal:block tal:content="cron/user"/></td>
+                      <td><tal:block tal:content="cron/periodicity"/></td>
+                      <td><tal:block tal:content="cron/snext"/></td>
+                      <td><tal:block tal:content="cron/slast"/></td>
+                      <td tal:define="status cron/last_status">
+                        <tal:block tal:content="python:view.get_status(status)"/>
+                      </td>
+                    </tr>
+                  </tal:block>
+                </tal:block>
+              </tbody>
+            </table>
+            <input i18n:translate=""  type="submit" value="Send"/>
+          </div>
+        </form>
+      </div>
+    </metal:main>
+  </body>
+</html>

@@ -4,6 +4,6 @@
       meta_type="Filesystem Directory View"
       directory="collective.cron:skins/ccron_custom_templates"/>
   <skin-path name="*">
-    <layer name="ccron_custom_templates" insert-after="custom"/>
+    <layer remove="true" name="ccron_custom_templates" insert-after="custom"/>
   </skin-path>
 </object>

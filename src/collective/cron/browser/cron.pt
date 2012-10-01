@@ -1,0 +1,155 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en"
+  xmlns:tal="http://xml.zope.org/namespaces/tal"
+  xmlns:metal="http://xml.zope.org/namespaces/metal"
+  xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+  lang="en"
+  metal:use-macro="context/prefs_main_template/macros/master"
+  i18n:domain="collective.cron">
+  <body>
+    <metal:main fill-slot="prefs_configlet_main"
+      tal:define="controlPanel python:modules['Products.CMFCore.utils'].getToolByName(here, 'portal_controlpanel');
+      cron options/cron;
+      uid cron/uid;
+      ">
+      <h1 class="documentFirstHeading"
+        i18n:translate="heading_user_panel">
+        Crontab Preferences</h1>
+      <div class="documentDescription" i18n:translate="">
+        This area allows you to overview this task settings
+      </div>
+      <form id="cron_action_form" method="POST"
+        tal:attributes="action string:@@cron-settings/cron_action">
+        <input type="hidden" name="cron_action" value="nothing"/>
+        <input type="hidden" name="uid" tal:attributes="value uid"/>
+        <a id="edit-cron" tal:attributes="href string:@@cron-settings/cron_edit?uid=${uid}">Edit</a>
+        <a id="run-cron" class="cronAction"    href="#">Run</a>
+        <a id="delete-cron" class="cronAction" href="#">Delete</a>
+<script type="text/javascript">
+     $(function(){
+       $('a.cronAction').each(function(i, elem) {
+         $(elem).bind('click', function(evt) {
+           var action = $(elem).attr('id');
+           $("input[name=cron_action]").val(action);
+           $("#cron_action_form").submit();
+           evt.preventDefault();
+           return false;
+         });
+       });
+     });
+</script>
+
+      </form>
+      <div id="content-core">
+        <form method="POST"
+          tal:attributes="
+          action string:@@cron-settings/process_cron_multiple?uid=${uid}">
+          <table class="listing">
+            <thead>
+              <tr>
+                <th i18n:translate="">activated</th>
+                <th i18n:translate="">name</th>
+                <th i18n:translate="">user</th>
+                <th i18n:translate="">periodicity</th>
+                <th i18n:translate="">Next run</th>
+                <th i18n:translate="">Last run</th>
+                <th i18n:translate="">Last status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><p
+                  tal:content="python:cron.activated and 'yes' or 'no'"/></td>
+                <td>
+                  <a
+                    tal:attributes="href string:@@cron-settings/cron_view?uid=${uid}">
+                    <p tal:content="cron/name"></p>
+                  </a>
+                </td>
+                <td><p tal:content="cron/user" ></p></td>
+                <td><p tal:content="cron/periodicity" ></p></td>
+                <td><p tal:content="cron/snext"       ></p></td>
+                <td><p tal:content="cron/slast"       ></p></td>
+                <td><p tal:content="cron/last_status" ></p></td>
+              </tr>
+            </tbody>
+          </table>
+          <input i18n:translate=""  type="submit" value="Send"/>
+        </form>
+        <ta:if tal:condition="cron/environ">
+        <h2 i18n:translate="">Environ</h2>
+        <table class="listing" style="width:90%">
+          <thead>
+            <tr>
+              <th i18n:translate="">KEY</th>
+              <th i18n:translate="">VALUE</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tal:block tal:repeat="k cron/environ">
+              <tr>
+                <td><p tal:content="k"></p></td>
+                <td>
+                  <p
+                    tal:content="python:cron.environ[k]"
+                    ></p>
+                </td>
+              </tr>
+            </tal:block>
+          </tbody>
+        </table>
+        </ta:if>
+        <ta:if tal:condition="cron/logs">
+        <form method="POST"
+          tal:define="
+          limit python:10;
+          logsdata python:view.list_logs(cron, limit=limit);
+          l logsdata/len;
+          logs logsdata/logs;"
+          tal:attributes="
+          action string:@@cron-settings/cron_deletelog?uid=${uid}">
+          <h2 i18n:translate="">Logs
+          </h2>
+          <input name="logdeletetop" i18n:translate=""  type="submit" value="Send"/>
+          <p>
+            <label 18n:translate="">Delete all logs : </label>
+            <input type="checkbox" name="alllogs_to_delete"/>
+          </p>
+          <p tal:condition="python:limit<=l">
+            <tal:block i18n:translate="">Displaying : </tal:block> <tal:block tal:content="limit">10</tal:block>/<tal:block tal:content="l">1000</tal:block> <tal:block i18n:translate="">last logs</tal:block>
+          </p>
+          <table class="listing" style="width:90%">
+            <thead>
+              <tr>
+                <th style="width:3%" i18n:translate="">Delete</th>
+                <th style="width:15%" i18n:translate="">DATE</th>
+                <th style="width:3%" i18n:translate="">STATUS</th>
+                <th style="width:79%" i18n:translate="">MESSAGES</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tal:block tal:repeat="log logs">
+                <tr tal:define="status log/status">
+                  <td>
+                    <input type="checkbox" name="logs_to_delete"
+                      tal:attributes="value log/idx"/>
+                  </td>
+                  <td><p tal:content="log/date"></p></td>
+                  <td><p tal:content="python:view.get_status(status)"></p></td>
+                  <td>
+                    <ul>
+                      <tal:block tal:repeat="m log/messages">
+                        <li tal:content="m"/>
+                      </tal:block>
+                    </ul>
+                  </td>
+                </tr>
+              </tal:block>
+            </tbody>
+          </table>
+          <input name="logdelete" i18n:translate=""  type="submit" value="Send"/>
+        </form>
+        </ta:if>
+      </div>
+    </metal:main>
+  </body>
+</html>

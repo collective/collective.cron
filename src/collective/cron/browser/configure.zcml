@@ -1,5 +1,6 @@
 <configure
     xmlns="http://namespaces.zope.org/zope"
+    xmlns:zcml="http://namespaces.zope.org/zcml"
     xmlns:browser="http://namespaces.zope.org/browser"
     i18n_domain="collective.cron">
 
@@ -7,8 +8,28 @@
   <interface
       interface=".interfaces.IThemeSpecific"
       type="zope.publisher.interfaces.browser.IBrowserSkinType"
-      name="collective.cron"
+      name="collective.cron-theme"
     />
+  <interface name="collective.cron" interface="collective.cron.interfaces.ILayer" />
+  <include
+      package="Products.CMFCore" file="permissions.zcml"
+      zcml:condition="have plone-41" />
+  <browser:page
+      name="cron-settings"
+      layer="collective.cron.interfaces.ILayer"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"
+      class=".controlpanel.CrontabManager"
+      permission="cmf.ManagePortal"
+      allowed_interface=".controlpanel.ICrontabManager"
+    />
+  <adapter factory=".controlpanel.UserValidator"/>
+  <browser:page
+      layer="collective.cron.interfaces.ILayer"
+      for="*"
+      class=".kss.NullFormValidation"
+      attribute="validate_input"
+      permission="zope2.View"
+      name="kss_z3cform_inline_validation" />
 
   <!-- Viewlets registration -->
   <!-- Zope 3 browser resources -->

@@ -6,4 +6,16 @@
     xmlns:cmf="http://namespaces.zope.org/cmf"
     xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
     i18n_domain="collective.cron">
-</configure>        
+  <adapter factory=".manager.CronManager" />
+  <adapter factory=".manager.CrontabManager" />
+  <adapter factory=".utils.CCRONUtils" />
+  <adapter factory=".exportimport.CronsExportImporter" />
+  <subscriber handler=".manager.do_synchronize"/>
+  <subscriber handler=".manager.do_syncronize_on_mod"/>
+  <subscriber handler=".manager.server_restart"/>
+
+  <!-- plone.app.registry backed persistance -->
+  <include file="registry.zcml"/>
+  <!-- plone.app.async based task queuing -->
+  <include file="ploneappasync.zcml"/>
+</configure>

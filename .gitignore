@@ -1,4 +1,14 @@
 *.egg-info
+*.env
+coverage.xml
+htmlcov
+.coverage
+tags.python
+sys/
+plone.env
+b.sh
+dist
+*minitage*
 src.mrdeveloper
 *.mo
 *.pyc
@@ -13,3 +23,4 @@ include/
 lib/
 parts/
 var/
+.cache

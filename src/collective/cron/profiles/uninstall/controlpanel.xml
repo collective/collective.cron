@@ -3,7 +3,9 @@
     name="portal_controlpanel"
     xmlns:i18n="http://xml.zope.org/namespaces/i18n"
     i18n:domain="collective.cron">
-  <configlet title="Cron Dashboard"
+  <configlet 
+      remove="True"
+      title="Cron Dashboard"
       action_id="CCronSettings"
       appId="CCronSettings"
       category="Products"
@@ -11,8 +13,5 @@
       url_expr="string:${portal_url}/@@cron-settings"
       visible="True"
       i18n:attributes="title">
-    <permission>ccron: View</permission>
-    <permission>ccron: Edit</permission>
-    <permission>Manage portal</permission>
   </configlet>
 </object>

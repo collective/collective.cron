@@ -1,0 +1,16 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:grok="http://namespaces.zope.org/grok"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.cron">
+
+  <!-- plone.app.async based task queuing -->
+  <adapter factory=".ploneappasync.Queue" />
+  <adapter factory=".ploneappasync.CrontabMarker" />
+  <adapter factory=".ploneappasync.AnnotedQueue" />
+  <subscriber handler=".ploneappasync.register_on_restart"/>
+
+</configure>

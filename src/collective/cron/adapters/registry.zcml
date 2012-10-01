@@ -1,0 +1,13 @@
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:five="http://namespaces.zope.org/five"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:grok="http://namespaces.zope.org/grok"
+    xmlns:cmf="http://namespaces.zope.org/cmf"
+    xmlns:genericsetup="http://namespaces.zope.org/genericsetup"
+    i18n_domain="collective.cron">
+  <adapter factory=".registry.CrontabRegistryManager" />
+  <subscriber handler=".registry.synchronize_queue_added"/>
+  <subscriber handler=".registry.synchronize_queue_edited"/>
+  <subscriber handler=".registry.synchronize_queue_removed"/>
+</configure>

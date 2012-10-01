@@ -2,29 +2,31 @@
 # -*- coding: utf-8 -*-
 __docformat__ = 'restructuredtext en'
 import datetime
-from five import grok
+
+
+from zope.interface import implements
+from zope.component import adapts
 from collective.cron import interfaces as i
+from Products.CMFPlone.interfaces.siteroot import IPloneSiteRoot
+from collective.cron import crontab
 
-class CACRONUtils(grok.Adapter):
-    grok.provides(i.ICCRONUtils)
-    grok.context(i.ICCRONContent)
+class CCRONUtils(object):
+    adapts(IPloneSiteRoot, i.ICron)
+    implements(i.ICCRONUtils)
 
-    def log(self, date=None, status=u'OK', errors=None):
-        if not date: date = datetime.datetime.now()
-        if not errors: errors = []
-        r = self.context.results_folder()
-        rid = date.strftime('%d%m%Y%H%M%S') + '-%s' % status
-        rid = r.invokeFactory('JobResult', rid)
-        result = r[rid]
-        result.date = date
-        result.status = status
-        result.errors = errors
+    def __init__(self, context, cron):
+        self.context = context
+        self.cron = cron
+
+
 
     def getFolder(self, id, title='Folder', context=None):
         if context is None:
             context = self.context
         if not id in context.objectIds():
             id = context.invokeFactory('Folder', id, title=title)
+            context[id].processForm()
         return context[id]
-   
+
+
 # vim:set et sts=4 ts=4 tw=80:
