@@ -5,7 +5,7 @@ Changelog
 2.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- better tests for addons consumers [kiorky]
 
 
 2.0 (2012-10-10)

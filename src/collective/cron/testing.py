@@ -119,17 +119,20 @@ class CollectiveCronLayer(base.AsyncLayer):
     def setUpZope(self, app, configurationContext):
         base.AsyncLayer.setUpZope(self, app, configurationContext)
         import collective.cron
+        from collective.cron import tests
         self.loadZCML('configure.zcml', package=collective.cron)
         z2.installProduct(app, 'collective.cron')
-        self.loadZCML('test.zcml', package=collective.cron.tests)
+        self.loadZCML('test.zcml', package=tests)
 
     def setUpPloneSite(self, portal):
         base.AsyncLayer.setUpPloneSite(self, portal)
         self.applyProfile(portal, 'collective.cron:default')
 
+COLLECTIVE_CRON_FIXTURE             = CollectiveCronLayer()
+
 _layer = None
 class LayerMixin(base.LayerMixin):
-    defaultBases = (CollectiveCronLayer() ,)
+    defaultBases = (COLLECTIVE_CRON_FIXTURE,)
     def testTearDown(self):
         from collective.cron import testing as crontesting
         crontesting._layer = None
@@ -201,7 +204,6 @@ class SimpleLayer(Layer):
     defaultBases = tuple()
 
 COLLECTIVE_CRON_SIMPLE              = SimpleLayer(name='CollectiveCron:Simple')
-COLLECTIVE_CRON_FIXTURE             = CollectiveCronLayer()
 COLLECTIVE_CRON_INTEGRATION_TESTING = IntegrationTesting(
     name = "CollectiveCron:Integration")
 COLLECTIVE_CRON_FUNCTIONAL_TESTING  = FunctionalTesting(
