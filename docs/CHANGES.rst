@@ -2,6 +2,12 @@ Changelog
 ============
 
 
+2.1 (unreleased)
+----------------
+
+- Nothing changed yet.
+
+
 2.0 (2012-10-10)
 ----------------
 - Rewrite collective.cron for better robustness, documentation & no extra dependencies on content types
