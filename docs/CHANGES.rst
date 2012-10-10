@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.1 (unreleased)
+2.1 (2012-10-10)
 ----------------
 
 - better tests for addons consumers [kiorky]
