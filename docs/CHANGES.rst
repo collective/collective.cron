@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.2 (unreleased)
+2.2 (2012-10-11)
 ----------------
 
 - make install and restart code more robust.
