@@ -4,9 +4,10 @@ Changelog
 
 2.3 (unreleased)
 ----------------
-
-- Nothing changed yet.
-
+- better registry handling [kiorky]
+- better jobrunner [kiorky]
+- better tests  [kiorky]
+- make install and restart code more robust, again [kiorky]
 
 2.2 (2012-10-11)
 ----------------

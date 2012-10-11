@@ -30,8 +30,7 @@ class AQueueTest(base.IntegrationTestCase):
         [self.queue.remove(j) for j in self.queue]
 
     def test_pasync_queue_annotations(self):
-        self.assertEquals(self.aqueue.annotations,
-                          {'plone': ['/plone']})
+        self.assertEquals(self.aqueue.annotations, {'plone': ['/plone']})
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)

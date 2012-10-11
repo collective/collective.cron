@@ -114,8 +114,20 @@ def tearDownDatetime():
     zcatesting._now  = old__now
     zcatesting.tearDownDatetime()
 
+class Timed(Layer):
+    defaultBases=tuple()
+    def setUp(self):
+        setUpDatetime()
+
+    def testSetUp(self):
+        set_now(datetime.datetime(2008, 1, 1, 1, 0))
+
+    def tearDown(self):
+        tearDownDatetime()
 
 class CollectiveCronLayer(base.AsyncLayer):
+    defaultBases = ((Timed(),) + base.AsyncLayer.defaultBases)
+
     def setUpZope(self, app, configurationContext):
         base.AsyncLayer.setUpZope(self, app, configurationContext)
         import collective.cron
@@ -139,6 +151,7 @@ class LayerMixin(base.LayerMixin):
         transaction.commit()
     def testSetUp(self):
         base.LayerMixin.testSetUp(self)
+        transaction.commit()
         self['cron'] = crontab.Cron(
             name=u'testcron',
             activated = True,
@@ -160,12 +173,16 @@ class LayerMixin(base.LayerMixin):
 
 class IntegrationTesting(LayerMixin, base.IntegrationTesting):
     def testTearDown(self):
+        transaction.commit()
         LayerMixin.testTearDown(self)
+        transaction.commit()
         base.IntegrationTesting.testTearDown(self)
 
     def testSetUp(self):
         base.IntegrationTesting.testSetUp(self)
+        transaction.commit()
         LayerMixin.testSetUp(self)
+        transaction.commit()
 
 class FunctionalTesting(LayerMixin, base.FunctionalTesting):
     def testTearDown(self):
@@ -179,41 +196,14 @@ class FunctionalTesting(LayerMixin, base.FunctionalTesting):
         LayerMixin.testSetUp(self)
         transaction.commit()
 
-class TimedTesting(Layer):
-    def setUp(self):
-        setUpDatetime()
-
-    def tearDown(self):
-        tearDownDatetime()
-
-class TimedFunctionalTesting(FunctionalTesting):
-    defaultBases = ((TimedTesting(),) + FunctionalTesting.defaultBases)
-
-    def testSetUp(self):
-        set_now(datetime.datetime(2008,1,1,1,1))
-        transaction.commit()
-        FunctionalTesting.testSetUp(self)
-        transaction.commit()
-
-    def testTearDown(self):
-        transaction.commit()
-        FunctionalTesting.testTearDown(self)
-        transaction.commit()
-
 class SimpleLayer(Layer):
-    defaultBases = tuple()
+    defaultBases = (Timed(),)
 
 COLLECTIVE_CRON_SIMPLE              = SimpleLayer(name='CollectiveCron:Simple')
 COLLECTIVE_CRON_INTEGRATION_TESTING = IntegrationTesting(
     name = "CollectiveCron:Integration")
 COLLECTIVE_CRON_FUNCTIONAL_TESTING  = FunctionalTesting(
     name = "CollectiveCron:Functional")
-COLLECTIVE_CRON_TFUNCTIONAL_TESTING  = TimedFunctionalTesting(
-    name = "CollectiveCron:TFunctional")
-COLLECTIVE_CRON_SELENIUM_TESTING    = FunctionalTesting(
-    bases = (SELENIUM_TESTING,
-             COLLECTIVE_CRON_FUNCTIONAL_TESTING,),
-    name = "CollectiveCron:Selenium")
 
 """
 Register our layers as using async storage
@@ -221,8 +211,7 @@ Register our layers as using async storage
 base.registerAsyncLayers(
     [COLLECTIVE_CRON_FIXTURE,
      COLLECTIVE_CRON_INTEGRATION_TESTING,
-     COLLECTIVE_CRON_FUNCTIONAL_TESTING,
-     COLLECTIVE_CRON_SELENIUM_TESTING]
+     COLLECTIVE_CRON_FUNCTIONAL_TESTING,]
 )
 
 

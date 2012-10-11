@@ -11,9 +11,6 @@ from StringIO import StringIO
 from zope.event import notify
 
 def setupVarious(context):
-    ### XXX making ._p_jar appear ###
-    transaction.savepoint()
-
     # Ordinarily, GenericSetup handlers check for the existence of XML files.
     # Here, we are not parsing an XML file, but we use this text file as a
     # flag to check that we actually meant for this import step to be run.
@@ -21,26 +18,25 @@ def setupVarious(context):
 
     if context.readDataFile('collectivecron_various.txt') is None:
         return
+    ### XXX making ._p_jar appear ###
+    transaction.savepoint() 
     # if the queue is not marked, initialize the crontab !
     portal = getToolByName(
         context.getSite(), 'portal_url').getPortalObject()
     # initialiing manager will in turn intialize any
     # queue manager who is in charge for initializing
     # needed stuff for async jobs
-    oldsite = getSite()
-    setSite(portal)
+    #oldsite = getSite()
+    #setSite(portal)
     crt = crontab.Crontab.load()
     marker = getMultiAdapter(
         (portal, crt),
         i.ICrontabManager
     )
     crt.save()
-
-    setSite(oldsite)
+    #setSite(oldsite)
 
 def setupCrons(context): # pragma: no cover
-    ### XXX making ._p_jar appear ###
-    transaction.savepoint()
     logger = logging.getLogger('collective.cron.exportCrons')
 
     # Ordinarily, GenericSetup handlers check for the existence of XML files.
@@ -51,6 +47,8 @@ def setupCrons(context): # pragma: no cover
     xml = context.readDataFile('crons.xml')
     if xml is None:
         return
+    ### XXX making ._p_jar appear ###
+    transaction.savepoint() 
     # if the queue is not marked, initialize the crontab !
     portal = getToolByName(
         context.getSite(), 'portal_url').getPortalObject()

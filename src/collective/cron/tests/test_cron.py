@@ -507,7 +507,7 @@ class Crontest(base.SimpleTestCase):
         cron.save()
         lllen = len(crt.manager.crontab)
         self.assertEquals(
-            crontab.json.loads(crt.manager.crontab[-1])['name'],
+            crontab.json.loads(crt.manager.crontab[0])['name'],
             crondata["name"])
         self.assertEquals(llen, lllen)
         crondata["uid"] = "notyet"

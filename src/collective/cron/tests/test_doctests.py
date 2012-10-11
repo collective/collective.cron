@@ -14,7 +14,7 @@ Launching all doctests in the tests directory using:
 from collective.cron.tests.globals import *
 from collective.cron.testing import (
     COLLECTIVE_CRON_FUNCTIONAL_TESTING as FUNCTIONAL_TESTING,
-    COLLECTIVE_CRON_TFUNCTIONAL_TESTING as TFUNCTIONAL_TESTING,
+#    COLLECTIVE_CRON_TFUNCTIONAL_TESTING as TFUNCTIONAL_TESTING,
 )
 import unittest2 as unittest
 import glob
@@ -42,8 +42,8 @@ def test_suite():
     globs = globals()
     for s in files:
         layer = FUNCTIONAL_TESTING
-        if 'timed_' in s:
-            layer = TFUNCTIONAL_TESTING
+        #if 'timed_' in s:
+        #    layer = FUNCTIONAL_TESTING
         suite.addTests([
             layered(
                 doctest.DocFileSuite(

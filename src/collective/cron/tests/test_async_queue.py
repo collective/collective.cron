@@ -115,11 +115,13 @@ class QueueTest(base.IntegrationTestCase):
 
     def test_pasync_queue_get_job_present(self):
         # a job without begin_after, first of all
+        [self.layer['queue'].remove(a) for a in self.layer['queue']]
+        transaction.commit()
         job, job_infos = self.make_simpleOne()
         job1 = self.cqueue.get_job_present(job_infos)
         self.assertTrue(job is job1)
         self.queue.remove(job)
-        job1 = self.cqueue.get_job_present(job_infos)
+        job1 = self.cqueue.get_job_in_queue(job_infos)
         self.assertTrue(job1 is None)
 
     def test_pasync_queue_compare_job(self):
@@ -166,6 +168,7 @@ class QueueTest(base.IntegrationTestCase):
         self.assertFalse(self.cqueue.is_job_present())
 
     def test_pasync_queue_get_job_status(self):
+        transaction.commit()
         job, job_infos = self.make_simpleOne()
         self.assertTrue(
             self.cqueue.get_job_status()
