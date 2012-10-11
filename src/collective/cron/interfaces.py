@@ -30,6 +30,7 @@ class InvalidCrontab(InvalidObject): pass
 class CronFormatError(Invalid): pass
 
 class RegistryCrontabNotReady(Exception):pass
+class AsyncQueueNotReady(Exception):pass
 
 
 

@@ -17,7 +17,9 @@ from collective.cron.interfaces import (
     ICrontab,
     ICrontabRegistryManager,
     IRegistryCrontab,
+    AsyncQueueNotReady,
     RegistryCrontabNotReady,
+    AsyncQueueNotReady,
 )
 from collective.cron import crontab
 from collective.cron import events as e
@@ -44,7 +46,7 @@ class CrontabRegistryManager(object):
             self.cronsettings.crontab = []
         return self.cronsettings.crontab
     def _set_crontab(self, value):
-        if not self.read_only: # pragma: no cover  
+        if not self.read_only: # pragma: no cover
             self.cronsettings.crontab[:] = value
     crontab = property(_get_crontab, _set_crontab)
 
@@ -106,7 +108,9 @@ def synchronize_queue_edited(itema, itemb):
         notify(
             e.CrontabSynchronisationEvent(
                 plone, crt))
-    except RegistryCrontabNotReady, ex: # pragma: no cover  
+    except AsyncQueueNotReady, ex: # pragma: no cover
+        pass
+    except RegistryCrontabNotReady, ex: # pragma: no cover
         pass
 
 @adapter(IRegistryCrontab, IRecordAddedEvent)
@@ -117,18 +121,22 @@ def synchronize_queue_added(itema, itemb):
         notify(
             e.CrontabSynchronisationEvent(
                 plone, crt))
+    except AsyncQueueNotReady, ex: # pragma: no cover
+        pass
     except RegistryCrontabNotReady, ex:
         pass
 
 @adapter(IRegistryCrontab, IRecordRemovedEvent)
-def synchronize_queue_removed(itema, itemb): # pragma: no cover   
+def synchronize_queue_removed(itema, itemb): # pragma: no cover
     try:
         plone = getSite()
         crt = crontab.Crontab.load()
         notify(
             e.CrontabSynchronisationEvent(
                 plone, crt))
-    except RegistryCrontabNotReady, ex: # pragma: no cover  
+    except AsyncQueueNotReady, ex: # pragma: no cover
+        pass
+    except RegistryCrontabNotReady, ex: # pragma: no cover
         pass
 
 # vim:set et sts=4 ts=4 tw=80:

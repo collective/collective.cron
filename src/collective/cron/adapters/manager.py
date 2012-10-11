@@ -11,6 +11,7 @@ from zope.component import (
     adapts,
     adapter,
     getAdapters,
+    ComponentLookupError,
     getMultiAdapter,
     getAdapter,
 )
@@ -23,8 +24,11 @@ class AsyncManager(object):
     implements(i.IAsyncManager)
     def __init__(self, context):
         self.context = context
-        self.queue = getAdapter(self.context, i.IQueue)
-        self.queue.setUp()
+        try:
+            self.queue = getAdapter(self.context, i.IQueue)
+        except ComponentLookupError, ex:
+            raise i.AsyncQueueNotReady('queue is not ready')
+
 
 class CronManager(AsyncManager):
     implementsOnly(i.ICronManager)
@@ -179,36 +183,5 @@ def server_restart(event):
         item = jobs[sitem]
         if item['activated']:
             log.info('%s: Re activated %s' % (ppath, item['cron']))
-
-#class run_job(grok.View):
-#    grok.context(i.IBackend)
-#    def render(self):
-#        messages = IStatusMessage(self.request)
-#        try:
-#            a = i.IBackendJobManager(self.context)
-#            job = a.register_job(force=True)
-#            messages.addStatusMessage(_( u"Job queued", ), type="info")
-#        except Exception, ex:
-#            messages.addStatusMessage(
-#                _(u"Job failed to be queued: ${ex}", mapping={"ex":ex}),
-#                type="error"
-#            )
-#        return self.response.redirect(
-#            self.context.absolute_url()
-#        )
-#class View(dexterity.DisplayForm):
-#
-#    def next_runtime(self):
-#        b = self.context
-#        manager = i.IBackendJobManager(b)
-#        j = manager.get_job_present()
-#        d = None
-#        if j is not None:
-#            d = j._begin_after
-#        sstr = _('NOW')
-#        if d is not None:
-#           pv = b.restrictedTraverse('@@plone')
-#           sstr = pv.toLocalizedTime(d, long_format=True)
-#        return sstr
 
 # vim:set et sts=4 ts=4 tw=80:

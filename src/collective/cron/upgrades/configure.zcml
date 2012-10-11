@@ -14,7 +14,7 @@
     <genericsetup:upgradeStep
           title="collective.cron import CSS"
           description=""
-          handler=".import_css" />  
+          handler=".import_css" />
     <genericsetup:upgradeStep
         title="collective.cron import JS"
         description=""
@@ -23,7 +23,7 @@
         title="collective.cron Recook resources"
         description=""
         handler=".recook_resources" />
-  </genericsetup:upgradeSteps>  
+  </genericsetup:upgradeSteps>
 
   <genericsetup:upgradeSteps
       profile="collective.cron:default"
@@ -34,9 +34,17 @@
         description=""
         handler=".upgrade_1000"
       />
-  </genericsetup:upgradeSteps> 
+  </genericsetup:upgradeSteps>
 
   -->
+  <genericsetup:upgradeSteps
+      profile="collective.cron:default" source="*" destination="2001">
+    <genericsetup:upgradeStep
+        title="collective.cron * - 2001"
+        description="migrate the plonesites marker annotation to only use path"
+        handler=".upgrade_2001"
+      />
+  </genericsetup:upgradeSteps>
 
   <!-- vim:set ft=xml: -->
 </configure>

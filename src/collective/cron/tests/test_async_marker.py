@@ -31,7 +31,7 @@ class MarkerTest(base.IntegrationTestCase):
 
     def test_pasync_marker_unmark(self):
         self.assertEquals(self.aqueue.annotations,
-                          {'plone': [('unnamed', '/plone')]})
+                          {'plone': ['/plone']})
         self.marker.unmark_crontab_aware()
         self.assertEquals(self.aqueue.annotations,
                           {'plone': []})
@@ -40,10 +40,10 @@ class MarkerTest(base.IntegrationTestCase):
         self.marker.unmark_crontab_aware()
         self.marker.mark_crontab_aware()
         self.assertEquals(self.aqueue.annotations,
-                          {'plone': [('unnamed', '/plone')]})
+                          {'plone': ['/plone']})
 
     def test_pasync_marker_key(self):
-        self.assertEquals(self.marker.key, ('unnamed', '/plone'))
+        self.assertEquals(self.marker.key, '/plone')
 
     def test_pasync_marker_marked(self):
         self.marker.unmark_crontab_aware()

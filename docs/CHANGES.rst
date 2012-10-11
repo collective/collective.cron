@@ -5,7 +5,10 @@ Changelog
 2.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- make install and restart code more robust.
+  This is **release codename Wine**. A really thanks to Andreas Jung which helped me to find a difficult bug
+  with ZODB transactions. (call transaction.savepoint to make _p_jar which was None to appear).
+  [kiorky]
 
 
 2.1 (2012-10-10)

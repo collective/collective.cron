@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 __docformat__ = 'restructuredtext en'
 import pytz
 import datetime
@@ -7,6 +8,7 @@ import logging
 
 from zope.interface import (implements,
                             alsoProvides,)
+
 from zope.component import (
     adapts,
     getUtility,
@@ -15,6 +17,7 @@ from zope.component import (
     getAdapter,
     adapter
 )
+import Zope2
 from zope.event import notify
 from zope.site.hooks import getSite, setSite
 from AccessControl.SecurityManagement import getSecurityManager, setSecurityManager
@@ -38,17 +41,23 @@ from collective.cron import crontab
 from collective.cron import utils
 
 
+def queue_aware(func):
+    def wrapper(self, *args, **kw):
+        self.marker.mark_crontab_aware()
+        return func(self, *args, **kw)
+    return wrapper
+
 class Queue(object):
     implements(i.IQueue)
     adapts(IPloneSiteRoot)
 
-    def setUp(self):
-        self.marker.mark_crontab_aware()
-
     def __init__(self, portal):
         self.log = logging.getLogger('collective.cron.ploneappasync')
         self.portal = portal
-        self.marker = getMultiAdapter(
+
+    @property
+    def marker(self):
+        return getMultiAdapter(
             (self.portal, self.queue), i.ICrontabMarker)
 
     @property
@@ -61,12 +70,17 @@ class Queue(object):
 
     @property
     def queue(self):
-        return self.service.getQueues()['']
+        try:
+            queue = self.service.getQueues()['']
+            return queue
+        except Exception, ex:
+            i.AsyncQueueNotReady('Queue is not ready')
 
     @property
     def jobs(self):
         return [a for a in self.queue]
 
+    @queue_aware
     def register_job(self, job_infos):
         job = self.service.queueJobWithDelay(
             None,
@@ -323,10 +337,11 @@ class Queue(object):
 
     def get_job_infos_from_queue(self):
         job_infos = []
-        for j in self.queue:
-            job_infos.append(
-                self.get_job_infos_from_job(j)
-            )
+        if self.queue:
+            for j in self.queue:
+                job_infos.append(
+                    self.get_job_infos_from_job(j)
+                )
         return job_infos
 
 
@@ -347,7 +362,6 @@ class CrontabMarker(object):
         self.portal = portal
         self.queue = queue
         self.ppath = "/".join(portal.getPhysicalPath())
-        self.db = portal._p_jar.db().database_name
 
     @property
     @annotable
@@ -362,7 +376,7 @@ class CrontabMarker(object):
 
     @property
     def key(self):
-        return self.db, self.ppath
+        return self.ppath
 
     @annotable
     def unmark_crontab_aware(self):
@@ -397,16 +411,38 @@ class AnnotedQueue(object):
             infos[i.MANAGE_KEY]['plone'] = PersistentList()
         return infos[i.MANAGE_KEY]
 
+# from plone.app.async.interfaces import IAsyncDatabase
+# from plone.app.async.service import AsyncService
+# @adapter(i.ICrontabInstallationEvent)
+# def register_on_install(event):
+#     # see plone.app.async.service.AsyncService.getQueues
+#     site = event.object
+#     log = logging.getLogger(
+#         'collective.cron.async.registerOnInstall')
+#     itransaction = Zope2.zpublisher_transactions_manager
+#     service = AsyncService()
+#     db = service._db = getUtility(IAsyncDatabase)
+#     asyncfs = db.databases.get(db.database_name)
+#     try:
+#         service._conn = asyncfs.open()
+#         queue = service.getQueues()['']
+#         s = getMultiAdapter((site, queue), i.ICrontabMarker)
+#         s.mark_crontab_aware()
+#         itransaction.commit()
+#     finally:
+#         asyncfs.close()
+#     setSite(site)
 
 @adapter(IQueueReady)
 def register_on_restart(event):
+    emsg = 'Ooops in registerOnRestart // loop (%s)'
     site = getSite()
     queue = event.object
     iqueue = i.IAnnotedQueue(queue)
-    log = logging.getLogger('collective.cron.async.registerOnRestart')
+    log = logging.getLogger(
+        'collective.cron.async.registerOnRestart')
     scontext = getSecurityManager()
-    from Zope2 import app
-    root = app()
+    root = Zope2.app()
     try:
         assert len(iqueue.annotations['plone']) > 0
     except Exception, ex : # pragma: no cover
@@ -414,27 +450,25 @@ def register_on_restart(event):
     plones = iqueue.annotations['plone']
     try:
         try:
-            for content in plones:
-                mountpoint, ppath = content
+            for ppath in plones:
                 try:
                     transaction.commit()
-                    queue._p_jar.sync()
                     restore_plone(root, ppath)
                 finally:
                     setSecurityManager(scontext)
+            transaction.commit()
         except Exception, ex: # pragma: no cover
+            transaction.abort()
             log.error(
-                'Ooops in registerOnRestart // loop (%s)' % ex)
+                 emsg % (ex))
     finally:
-        transaction.commit()
-        root._p_jar.sync()
         root._p_jar.close()
-    transaction.commit()
-    queue._p_jar.sync()
     setSite(site)
+    transaction.commit()
 
 def restore_plone(root, ppath):
-    log = logging.getLogger('collective.cron.async.restore_crons_for_plonesite')
+    log = logging.getLogger(
+        'collective.cron.async.restore_crons_for_plonesite')
     ex_msg = '%s: Ooops in reactivating: %s'
     try:
         plone = root.unrestrictedTraverse(ppath)
@@ -445,4 +479,4 @@ def restore_plone(root, ppath):
     except Exception, ex: # pragma: no cover
         log.error(ex_msg % (ppath, ex))
 
-# vim:set et sts=4 ts=4 tw=80:
+# vim:set et sts=4 ts=4 tw=80 :
