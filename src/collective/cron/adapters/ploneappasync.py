@@ -435,7 +435,7 @@ class AnnotedQueue(object):
 
 @adapter(IQueueReady)
 def register_on_restart(event):
-    emsg = 'Ooops in registerOnRestart // loop (%s)'
+    emsg = 'Ooops in registerOnRestart // loop (%s) (deactivated)'
     site = getSite()
     queue = event.object
     iqueue = i.IAnnotedQueue(queue)
@@ -450,33 +450,32 @@ def register_on_restart(event):
     plones = iqueue.annotations['plone']
     try:
         try:
-            for ppath in plones:
+            for idx, ppath in enumerate(plones[:]):
                 try:
-                    transaction.commit()
-                    restore_plone(root, ppath)
+                    try:
+                        transaction.commit()
+                        restore_plone(root, ppath)
+                    except Exception, ex:
+                        log.error(emsg % (ex))
+                        transaction.abort()
+                        iqueue.annotations['plone'].pop(idx)
                 finally:
                     setSecurityManager(scontext)
-            transaction.commit()
+                transaction.commit()
         except Exception, ex: # pragma: no cover
             transaction.abort()
-            log.error(
-                 emsg % (ex))
     finally:
         root._p_jar.close()
     setSite(site)
     transaction.commit()
 
-def restore_plone(root, ppath):
+def restore_plone(context, ppath):
     log = logging.getLogger(
         'collective.cron.async.restore_crons_for_plonesite')
-    ex_msg = '%s: Ooops in reactivating: %s'
-    try:
-        plone = root.unrestrictedTraverse(ppath)
-        setSite(plone)
-        crt = crontab.Crontab.load()
-        notify(e.ServerRestartEvent(plone, crt))
-        log.info('%s: tasks re-activated' % (ppath))
-    except Exception, ex: # pragma: no cover
-        log.error(ex_msg % (ppath, ex))
+    plone = context.unrestrictedTraverse(ppath)
+    setSite(plone)
+    crt = crontab.Crontab.load()
+    notify(e.ServerRestartEvent(plone, crt))
+    log.info('%s: tasks re-activated' % (ppath))
 
 # vim:set et sts=4 ts=4 tw=80 :
