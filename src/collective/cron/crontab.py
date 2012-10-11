@@ -3,6 +3,7 @@
 import logging
 import pytz
 import time
+import transaction
 import uuid
 __docformat__ = 'restructuredtext en'
 from zope.schema.fieldproperty import FieldProperty
@@ -24,6 +25,7 @@ except: # pragma: no cover
 from zope.component import adapts, getUtility, getAdapters, getMultiAdapter, queryMultiAdapter
 from zope.event import notify
 from collective.cron.utils import croniter, to_utc
+from zope.site.hooks import getSite, setSite
 from z3c.form.object import registerFactoryAdapter
 
 from collective.cron import MessageFactory as _
@@ -81,34 +83,46 @@ def runJob(context, cron):
     status = find_term(job_status, 'NOTRUN').value
     bpath = context.getPhysicalPath()
     messages = []
+    oldsite = getSite()
+    setSite(context)
+    crontab = Crontab.load()
     try:
-        notify(e.StartedCronJobEvent(context, cron))
-        logger.debug('Run job: %s/%s' % (cron.name, cron.uid))
-        if cron.activated and cron.crontab.activated:
-            adapter = queryMultiAdapter(
-                (context, cron), IJobRunner, name=cron.name)
-            if adapter is not None:
-                ret = adapter.run()
-                if ret is not None:
-                    if not isinstance(ret, list):
-                        ret = [ret]
-                    messages.extend(ret)
-                status = find_term(job_status, 'OK').value
-                # if we have had messages without exceptions, those
-                # are just warnings or pieces of information
-                if len(messages):
-                    status = find_term(job_status, 'WARN').value
-        notify(e.FinishedCronJobEvent(context, cron))
-    except Exception, ex:
-        messages.append('%s' % ex)
-        status = find_term(job_status, 'FAILURE').value
-    cron.log(status=status, messages=messages)
-    # fire the crontabmodified event which in turn will reregister the job
-    cron.save()
-    # if the job is not regitered throught the event, try to Re-register it
-    manager = getMultiAdapter((context, cron), ICronManager)
-    if not manager.queue.is_job_present(): # pragma: no cover
-        manager.register_or_remove()
+        cron = crontab.by_uid(cron.uid)
+        logger.warn('Run job: %s/%s' % (cron.name, cron.uid))
+        try:
+            notify(e.StartedCronJobEvent(context, cron))
+            if cron.activated and cron.crontab.activated:
+                adapter = queryMultiAdapter(
+                    (context, cron), IJobRunner, name=cron.name)
+                if adapter is not None:
+                    ret = adapter.run()
+                    if ret is not None:
+                        if not isinstance(ret, list):
+                            ret = [ret]
+                        messages.extend(ret)
+                    status = find_term(job_status, 'OK').value
+                    # if we have had messages without exceptions, those
+                    # are just warnings or pieces of information
+                    if len(messages):
+                        status = find_term(job_status, 'WARN').value
+            notify(e.FinishedCronJobEvent(context, cron))
+        except Exception, ex:
+            messages.append('%s' % ex)
+            status = find_term(job_status, 'FAILURE').value
+        cron.log(status=status, messages=messages)
+        # fire the crontabmodified event
+        # which in turn will reregister the job
+        crontab.save()
+        # if the job is not regitered throught the event,
+        # try to Re-register it
+        manager = getMultiAdapter((context, cron), ICronManager)
+        if not manager.queue.is_job_present(): # pragma: no cover
+            manager.register_or_remove()
+        #transaction.commit()
+        #context._p_jar.sync()
+    except NoSuchCron, ex:
+        # cron is no more there, skipping
+        pass
     return status, messages, cron.uid, bpath
 
 
@@ -270,12 +284,12 @@ class Cron(ConstrainedObject):
         if logs is not None and isinstance(logs, list):
             logs = [Log.load(l) for l in logs]
         self.logs = logs
-        # 2 pass validation for environ 
+        # 2 pass validation for environ
         if not environ:
             environ = {}
         self.environ = environ
-        if isinstance(self.environ, basestring): # pragma: no cover 
-            environ = json.loads(self.environ) 
+        if isinstance(self.environ, basestring): # pragma: no cover
+            environ = json.loads(self.environ)
         if self.logs is None:
             self.logs = []
 
