@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.3 (unreleased)
+2.3 (2012-10-11)
 ----------------
 - better registry handling [kiorky]
 - better jobrunner [kiorky]
