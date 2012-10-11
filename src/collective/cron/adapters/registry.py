@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 __docformat__ = 'restructuredtext en'
 import logging
+import transaction
 from zope.schema.fieldproperty import FieldProperty
 from zope.interface import (implements,)
 from zope.component import adapts, getUtility, adapter, getAdapters
@@ -97,8 +98,9 @@ class CrontabRegistryManager(object):
                 break
         scron = self.dumps(cron.dump())
         if idx is not None:
-            self.cronsettings.crontab.pop(idx)
-        self.cronsettings.crontab.append(scron)
+            self.cronsettings.crontab[idx] = scron
+        else:
+            self.cronsettings.crontab.append(scron)
 
 @adapter(IRegistryCrontab, IRecordModifiedEvent)
 def synchronize_queue_edited(itema, itemb):
