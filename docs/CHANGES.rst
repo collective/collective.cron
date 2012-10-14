@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.4 (unreleased)
+2.4 (2012-10-14)
 ----------------
 - Add a log limit property to logs to limit memory & other resources usage [kiorky]
 - Performance tweaks [kiorky]
