@@ -249,6 +249,7 @@ class ICron(IJsonRegistryAware):
         title=_(u"UserID the task will run as"),
         required=False, default=None,)
     activated = schema.Bool(title=_(u"Activated"), required=False,default=True)
+    logs_limit = schema.Int(title=_(u"The logs limit (max: 25) "), default=3, max=25, required=True,)
     periodicity = schema.TextLine(
         title=_(u"How to repeat the job (CRON format)"),
         constraint = cronFormatValidator, required=True)

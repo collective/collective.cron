@@ -58,6 +58,7 @@ We will add the related crontab to the plone site in the cron dashboard::
     >>> browser.getLink('Add a task').click()
     >>> browser.getControl(name='form.widgets.name').value = 'mycronjob'
     >>> browser.getControl(name='form.widgets.periodicity').value = '*/1 * * * *'
+    >>> browser.getControl(name='form.widgets.logs_limit').value = '25'
     >>> browser.getControl(name='form.widgets.senviron').value = '{"foo":"bar"}'
     >>> browser.getControl('Add').click()
 

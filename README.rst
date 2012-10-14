@@ -26,6 +26,13 @@ If you plan to integrate plone.app.cron to your buildout, please refer to the pl
 
 - For now we use the unreleased version of plone.app.async : https://github.com/plone/plone.app.async
 
+Note for tests
+=================
+- Tests can unpredictibly crash because of monkey patchs to datetime.
+  This is a false positive. Just relaunch them if you see something similar ::
+
+      ConflictError: database conflict error (oid 0x2549d9dd3cf6b59b, serial this txn started with 0x0399e4b3adb993bb 2012-10-14 09:23:40.716776, serial currently committed 0x0399e4b3ae733c77 2012-10-14 09:23:40.886752)
+
 collective.cron 1.0 => collective.cron 2.0
 ====================================================
 - in 1.0, each cron task was a content.
@@ -108,10 +115,11 @@ The major attributes for a cron are:
     - **name**: will be the queried name to search jobs
     - **periodicity**: give the next time execution
     - **environ**: An optionnal jsonencoded mapping of values which will be given to the task
+    - **logs_limit**: logs to keep (default : 5, limit : 25)
     - uid: internal id for the crontab machinery
     - user: The user the task will run as, its up to you to make the task run as this user
     - activated: the activation status of the cron
-    - logs: give the last logs of the cron prior executions
+    - logs: give the last logs of the cron prior executions from most recent to older.
     - crontab: A possibly null reference to the parent crontab
 
 A note on the user which is only **a stocked value**. you can see ``collective.cron.utils.su_plone`` to help you switch to that user.

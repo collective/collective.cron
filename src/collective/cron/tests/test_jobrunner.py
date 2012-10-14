@@ -93,12 +93,12 @@ class JobRunnerTest(base.IntegrationTestCase):
         self.gsm.registerHandler(finished_event)
         self.gsm.registerHandler(started_event)
         ret = runJob(self.portal, self.cron)
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].status, 3)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 3)
         self.assertEquals(_started[0], 1)
         self.gsm.unregisterHandler(finished_event)
         self.gsm.unregisterHandler(started_event)
         ret = runJob(self.portal, self.cron)
-        self.assertEquals(len(Crontab.load().by_name('testjobrunnercron')[0].logs), 2)
+        self.assertEquals(len(Crontab.load().by_name('testjobrunnercron')[-1].logs), 2)
         self.assertEquals(len(_started), 1)
         self.cron.name = u'testcron'
         self.cron.save()                                
@@ -112,7 +112,7 @@ class JobRunnerTest(base.IntegrationTestCase):
         adp =  self.get_adp(self.cron)
         self.assertTrue(adp is None)
         ret = runJob(self.portal, self.cron)
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].status, 3)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 3)
         #
         # register an adapter with trivial code
         # no failure
@@ -141,8 +141,8 @@ class JobRunnerTest(base.IntegrationTestCase):
         self.assertEquals(
             ret,
             (2, [u'warn'], self.cron.uid, ('', 'plone')))
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].status, 2)
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].messages, [u'warn'])
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 2)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].messages, [u'warn'])
         gsm.unregisterAdapter(SimpleRunnerWithWarn, name=self.cron.name)
         transaction.commit()
 
@@ -158,8 +158,8 @@ class JobRunnerTest(base.IntegrationTestCase):
             (0, [u'foo'], self.cron.uid, ('', 'plone')))
         gsm.unregisterAdapter(FailureRunner)
         transaction.commit()
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].status, 0)
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].messages, [u'foo'])
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 0)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].messages, [u'foo'])
         gsm.unregisterAdapter(FailureRunner, name=self.cron.name)
         transaction.commit()
 
@@ -168,12 +168,12 @@ class JobRunnerTest(base.IntegrationTestCase):
         # no failure / registered locally
         #
         ret = runJob(self.portal, self.cron)
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].status, 3)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 3)
         psm.registerAdapter(LocalSimpleRunner, name=self.cron.name)
         transaction.commit()
         ret = runJob(self.portal, self.cron)
         self.assertEquals(_results, [1, 2, 3])
-        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[-1].messages, [u'local'])
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].messages, [u'local'])
         psm.unregisterAdapter(LocalSimpleRunner, name=self.cron.name)
         transaction.commit()
         self.cron.name = u'testcron'

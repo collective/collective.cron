@@ -464,6 +464,7 @@ class Crontest(base.SimpleTestCase):
                  'messages': [u'2']}],
                 'periodicity': u'1 * * * *',
                 'activated': True,
+                'logs_limit': 5,
                 'name': u'1',
                 'environ': {u'foo': u'bar'},
                 'uid': u'1',

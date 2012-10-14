@@ -79,6 +79,9 @@ class Runner(object):
         raise NotImplementedError('implement me!')
 
 def runJob(context, cron):
+    # avoid memory usage by cleaning up each time the previous cron object
+    uid = cron.uid
+    del cron
     logger = logging.getLogger('backend/runJob')
     status = find_term(job_status, 'NOTRUN').value
     bpath = context.getPhysicalPath()
@@ -87,7 +90,7 @@ def runJob(context, cron):
     setSite(context)
     crontab = Crontab.load()
     try:
-        cron = crontab.by_uid(cron.uid)
+        cron = crontab.by_uid(uid)
         logger.warn('Run job: %s/%s' % (cron.name, cron.uid))
         try:
             notify(e.StartedCronJobEvent(context, cron))
@@ -118,12 +121,10 @@ def runJob(context, cron):
         manager = getMultiAdapter((context, cron), ICronManager)
         if not manager.queue.is_job_present(): # pragma: no cover
             manager.register_or_remove()
-        #transaction.commit()
-        #context._p_jar.sync()
     except NoSuchCron, ex:
         # cron is no more there, skipping
         pass
-    return status, messages, cron.uid, bpath
+    return status, messages, uid, bpath
 
 
 class Log(ConstrainedObject):
@@ -226,14 +227,30 @@ class Cron(ConstrainedObject):
     name = FieldProperty(ICron['name'])
     activated = FieldProperty(ICron['activated'])
     periodicity = FieldProperty(ICron['periodicity'])
-    logs = FieldProperty(ICron['logs'])
+    _logs = FieldProperty(ICron['logs'])
     environ = FieldProperty(ICron['environ'])
+    logs_limit = FieldProperty(ICron['logs_limit'])
+    """Limit logs to 25 to avoid large memory usage"""
 
     def __eq__(self, other):
         return self._eq__mixin(other)
 
     def similar(self, other):
         return self._eq__mixin(other, from_crontab=True)
+
+    def _limit_logs(self):
+        if self._logs is not None:
+            if len(self._logs) > self.logs_limit:
+                self._logs = self._logs[:self.logs_limit]
+
+    def _get_logs(self):
+        self._limit_logs()
+        return self._logs
+
+    def _set_logs(self, value):
+        self._logs = value
+        self._limit_logs()
+    logs = property(_get_logs, _set_logs)
 
     def _eq__mixin(self, other, from_crontab = False):
         """We assume that a cron is the same of another if they
@@ -271,7 +288,8 @@ class Cron(ConstrainedObject):
                  periodicity=None,
                  logs=None,
                  environ=None,
-                 crontab=None,):
+                 crontab=None,
+                 logs_limit=25):
         if not uid:
             uid = self.get_uid()
         self.uid = unicode(uid)
@@ -280,6 +298,7 @@ class Cron(ConstrainedObject):
         self.name = name
         self.user = user
         self.periodicity = periodicity
+        self.logs_limit = logs_limit
         self.activated = asbool(activated)
         if logs is not None and isinstance(logs, list):
             logs = [Log.load(l) for l in logs]
@@ -332,7 +351,7 @@ class Cron(ConstrainedObject):
         if not date: date = datetime.datetime.now()
         if not messages: messages = []
         r = Log(date, status, messages)
-        self.logs.append(r)
+        self.logs.insert(0, r)
         return r
 
     def get_uid(self):
@@ -413,6 +432,7 @@ class Cron(ConstrainedObject):
             'user': self.user,
             'activated': self.activated,
             'periodicity': self.periodicity,
+            'logs_limit': self.logs_limit,
             'logs': [l.dump() for l in self.logs],
             'environ': self.environ,
         }
@@ -433,6 +453,7 @@ class Cron(ConstrainedObject):
         if periodicity: periodicity=unicode(periodicity)
         activated = data.get('activated', False)
         environ = data.get('environ', {})
+        logs_limit = data.get('logs_limit', 5)
         logs = []
         if not isinstance(data.get('logs', None), list):
             data['logs'] = []
@@ -453,6 +474,7 @@ class Cron(ConstrainedObject):
                    activated=activated,
                    periodicity=periodicity,
                    logs=logs,
+                   logs_limit=logs_limit,
                    environ=environ,)
         return cron
 

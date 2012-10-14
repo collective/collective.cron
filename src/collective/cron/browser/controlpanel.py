@@ -82,7 +82,8 @@ class EditForm(form.EditForm):
         crt = crontab.Crontab.load()
         content =  crt.by(uid=pre['uid'])[0]
         changes = {}
-        for f in ['periodicity', 'user', 'senviron', 'name', 'activated']:
+        for f in ['periodicity', 'user', 'senviron',
+                  'name', 'activated', 'logs_limit',]:
             val = data.get(f, None)
             if f == 'senviron':
                 val = crontab.json.loads(val)
@@ -104,6 +105,7 @@ class EditForm(form.EditForm):
                 'uid': cron.uid,
                 'name': cron.name,
                 'user': cron.user,
+                'logs_limit': cron.logs_limit,
                 'activated': cron.activated,
                 'periodicity': cron.periodicity,
                 'senviron': crontab.json.dumps(cron.environ),

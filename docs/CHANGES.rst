@@ -4,8 +4,8 @@ Changelog
 
 2.4 (unreleased)
 ----------------
-
-- Nothing changed yet.
+- Add a log limit property to logs to limit memory & other resources usage [kiorky]
+- Performance tweaks [kiorky]
 
 
 2.3 (2012-10-11)
