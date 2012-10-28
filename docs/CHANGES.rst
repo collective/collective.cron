@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.5 (unreleased)
+2.5 (2012-10-28)
 ----------------
 
 - optimize API to get job status infos [kiorky]
