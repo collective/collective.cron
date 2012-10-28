@@ -389,7 +389,7 @@ class Cron(ConstrainedObject):
     def last(self):
         l = None
         if self.logs:
-            l = self.logs[-1]
+            l = self.logs[0]
         return l
 
     @property

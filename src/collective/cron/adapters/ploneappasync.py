@@ -74,7 +74,17 @@ class Queue(object):
             queue = self.service.getQueues()['']
             return queue
         except Exception, ex:
-            i.AsyncQueueNotReady('Queue is not ready')
+            try:
+                # make p_jar appear on site creation
+                if self.portal._p_jar is None:
+                    transaction.savepoint()
+                    getUtility(IAsyncService)._db = None
+                    queue = self.service.getQueues()['']
+                    return queue
+                else:
+                    raise Exception()
+            except Exception, ex:
+                i.AsyncQueueNotReady('Queue is not ready')
 
     @property
     def jobs(self):
@@ -160,9 +170,9 @@ class Queue(object):
                 return True
         return False
 
-    def get_job_status(self, job_infos=None):
+    def get_job_status(self, job_infos=None, only_active=False):
         status = None
-        j = self.get_job_present(job_infos)
+        j = self.get_job_present(job_infos, only_active=only_active)
         if j is not None:
             status = j.status
         return status
@@ -176,7 +186,7 @@ class Queue(object):
     def is_job_running(self, job_infos=None):
         """Search on all agents if the job is running"""
         return (
-            self.get_job_status(job_infos) ==
+            self.get_job_status(job_infos, only_active=True) ==
             zai.ACTIVE)
 
     def is_job_finished(self, job_infos=None):
@@ -211,13 +221,16 @@ class Queue(object):
             'kwargs': kwargs}
         return job_infos
 
-    def get_job_present(self, job_infos=None, only_in_queue=False, only_in_agents=False):
+    def get_job_present(self, job_infos=None,
+                        only_in_queue=False,
+                        only_in_agents=False,
+                        only_active=False):
         job = None
         if (not only_in_agents) or only_in_queue:
             job = self.get_job_in_queue(job_infos)
         # if job is not in the queue, search in the agent
         if (not only_in_queue and job is None) or only_in_agents:
-            job = self.get_job_in_agents(job_infos)
+            job = self.get_job_in_agents(job_infos, only_active=only_active)
         return job
 
     def get_job_in_queue(self, job_infos=None):

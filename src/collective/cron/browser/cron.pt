@@ -69,7 +69,7 @@
                 <td><p tal:content="cron/periodicity" ></p></td>
                 <td><p tal:content="cron/snext"       ></p></td>
                 <td><p tal:content="cron/slast"       ></p></td>
-                <td><p tal:content="cron/last_status" ></p></td>
+                <td><p tal:content="python:view.get_status(cron.last_status)" ></p></td>
               </tr>
             </tbody>
           </table>

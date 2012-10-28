@@ -5,7 +5,8 @@ Changelog
 2.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- optimize API to get job status infos [kiorky]
+- make better robust code [kiorky]
 
 
 2.4 (2012-10-14)
