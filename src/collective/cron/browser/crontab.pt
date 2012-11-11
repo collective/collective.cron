@@ -47,7 +47,7 @@
           <div class="tasks" tal:condition="python:bool(len(crontab.crons))">
 
             <h2 i18n:translate="">Available & scheduled tasks</h2>
-            <a i18n:translate=""href="@@cron-settings/add"
+            <a i18n:translate="" href="@@cron-settings/add"
               style="display:block;margin-bottom:10px;border:none;">Add a task</a>
             <table class="listing">
               <thead>
