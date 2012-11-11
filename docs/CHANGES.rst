@@ -5,7 +5,7 @@ Changelog
 2.6 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- fix #1 & #2 [kiorky]
 
 
 2.5 (2012-10-28)
