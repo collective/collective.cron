@@ -5,11 +5,11 @@ Introduction
 
 collective.cron is a cron-like asynchronous tasks system based on plone.app.async and plone.app.registry.
 The implementation does not yet have all the bells and wistles of a nice UI.
-However the simple interface do all the stuff And The underlying job manager works reliably.
+However the simple interface does all the stuff, and The underlying job manager works reliably.
 Finaly, you can register your tasks easily.
 
 
-Note that at the moment, we have 100% test coverage. This do not prevent from bugs but that make us comfurtable from the major hazard we can have.
+Note that at the moment, we have 100% test coverage. This do not prevent bugs altogether, but it keeps us from making big mistakes.
 
 The design is modern and modular, imagine that you can even easily change from plone.app.async to another job system.
 
