@@ -3,8 +3,8 @@ Introduction
 
 .. contents::
 
-collective.cron is a cron-like asynchronous tasks system based on top of plone.app.async and plone.app.registry.
-The implementation hasn't not for now all the bells and wistles of a nice UI.
+collective.cron is a cron-like asynchronous tasks system based on plone.app.async and plone.app.registry.
+The implementation does not yet have all the bells and wistles of a nice UI.
 However the simple interface do all the stuff And The underlying job manager works reliably.
 Finaly, you can register your tasks easily.
 
@@ -43,7 +43,7 @@ collective.cron 1.0 => collective.cron 2.0
 - Thus, there is no migration prepared from collective.cron 1.0 to 2.0
   It is up to you to do it.
   Specially, you will have to clean the database of all specific collective.cron 1.0 based & persistent content before upgrading.
-  Indeed, As the design of tasks is really different, we can't do any automatic migration.
+  Indeed, as the design of tasks is really different, we can't do any automatic migration.
 
 - First with collective.cron 1 in your buildout
 
@@ -86,10 +86,10 @@ Design
 =======
 - collective.cron lets you register crons which run periodically in your system.
 - Each plone site has a crontab.
-- This crontab is used by many composants to execute the cron jobs.
+- This crontab is used by many components to execute the cron jobs.
 - We have a central dashboard which will list all tasks registered on the site crontab.
-- The tasks configuration is based on plone.app.registry but design to be replaceable (composant)
-- The tasks execution is based on plone.app.async but design to be also replaceable (composant)
+- The tasks configuration is based on plone.app.registry but design to be replaceable (component)
+- The tasks execution is based on plone.app.async but design to be also replaceable (component)
 - The cron manager will ensure to restore all cron jobs for all plone sites at zope restart.
 
 Crontab
@@ -147,7 +147,7 @@ When a record is touched (added, edited, removed), we fire an event to syncroniz
 
 Crontab manager
 ---------------------
-This composant is responsible when a CrontabSynchronisationEvent is fired to synchronise the crontab with the job queuing system.
+This component is responsible when a CrontabSynchronisationEvent is fired to synchronise the crontab with the job queuing system.
 It will remove unrelated jobs and schedule new jobs.
 It adapts a plonesite and a crontab.
 
@@ -157,8 +157,8 @@ When the server restarts, a ``ServerRestartEvent`` is called to re-register any 
 
 Cron manager
 ------------------
-This composant is responsible forthe execution and presence in the queue of a particular cronjob.It can register or remove the job execution of a cron.
-This is a firendly proxy to the 'Queue manager"
+This component is responsible forthe execution and presence in the queue of a particular cronjob.It can register or remove the job execution of a cron.
+This is a friendly proxy to the 'Queue manager"
 
 It adapts a plonesite and a cron.
 
@@ -192,16 +192,16 @@ Annd then, you ll have to register cron called ``mycronjob`` in your plonesite,
 
 Queue manager
 ------------------------------------
-This composant will manage the jobs inside the job queue.
+This component will manage the jobs inside the job queue.
 You ll have enought methods to know for a specific cron if a job is present, what is its status,
 You can also register, or delete items from the running queue
 It adapts a plonesite.
 
 Crontab Queue Marker (plone.app.async specific)
 -----------------------------------------------------
-Responsible to mark infos in the async queue to make posible the reload of jobs at Zope restart.
+Responsible to mark infos in the async queue to make the reload of jobs at Zope restart possible.
 
-Detailled documentation
+Detailed documentation
 =========================
 There are 3 ways to register tasks:
 
