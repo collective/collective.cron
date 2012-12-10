@@ -88,8 +88,8 @@ Design
 - Each plone site has a crontab.
 - This crontab is used by many components to execute the cron jobs.
 - We have a central dashboard which will list all tasks registered on the site crontab.
-- The tasks configuration is based on plone.app.registry but design to be replaceable (component)
-- The tasks execution is based on plone.app.async but design to be also replaceable (component)
+- The tasks configuration is based on plone.app.registry but is designed to be replaceable (component)
+- The tasks execution is based on plone.app.async but is designed to be also replaceable (component)
 - The cron manager will ensure to restore all cron jobs for all plone sites at zope restart.
 
 Crontab
