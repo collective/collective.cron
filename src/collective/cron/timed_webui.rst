@@ -51,6 +51,7 @@ We will add the related crontab to the plone site in the cron dashboard::
     >>> dstart = datetime.datetime(2008,1,1,1,3)
     >>> set_now(dstart)
     >>> browser = Browser.new(purl, login=True)
+    >>> browser.handleErrors = False
     >>> browser.getLink('Site Setup').click()
     >>> browser.getLink('Cron Dashboard').click()
     >>> '@@cron-settings' in browser.contents
