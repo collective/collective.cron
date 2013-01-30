@@ -111,7 +111,7 @@
           </h2>
           <input name="logdeletetop" i18n:translate=""  type="submit" value="Send"/>
           <p>
-            <label 118n:translate="">Delete all logs : </label>
+            <label i18n:translate="">Delete all logs : </label>
             <input type="checkbox" name="alllogs_to_delete"/>
           </p>
           <p tal:condition="python:limit<=l">
