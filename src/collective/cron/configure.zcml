@@ -25,7 +25,7 @@
       title="various setup for collective.cron"
       description="various setup for collective.cron"
       handler="collective.cron.setuphandlers.setupVarious">
-    <depends name="content"/>
+    <depends name="plone.app.registry"/>
   </genericsetup:importStep>
   <genericsetup:importStep
       name="collective.cron.setupCrons"
