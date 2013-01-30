@@ -41,7 +41,7 @@ setup(
     include_package_data=True,
     extras_require = {
         'test': [
-            'plone.app.testing', 'ipython',
+            'plone.app.testing',
         ],
     },
     install_requires=[
