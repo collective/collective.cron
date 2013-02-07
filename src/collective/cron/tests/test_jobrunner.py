@@ -143,6 +143,7 @@ class JobRunnerTest(base.IntegrationTestCase):
             (2, [u'warn'], self.cron.uid, ('', 'plone')))
         self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].status, 2)
         self.assertEquals(Crontab.load().by_name('testjobrunnercron')[0].logs[0].messages, [u'warn'])
+        transaction.commit()
         gsm.unregisterAdapter(SimpleRunnerWithWarn, name=self.cron.name)
         transaction.commit()
 
