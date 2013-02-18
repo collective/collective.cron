@@ -2,7 +2,7 @@ Changelog
 ============
 
 
-2.7 (unreleased)
+2.7 (2013-02-18)
 ----------------
 
 - Fix various github bugs (typos, install setup, dependencies) [kiorky, gforcada, khink]
