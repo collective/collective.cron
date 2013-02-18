@@ -5,7 +5,7 @@ Changelog
 2.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix various github bugs (typos, install setup, dependencies) [kiorky, gforcada, khink]
 
 
 2.6 (2012-11-11)
