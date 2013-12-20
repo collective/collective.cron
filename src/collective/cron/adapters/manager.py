@@ -15,10 +15,12 @@ from persistent.list import PersistentList
 from persistent.dict import PersistentDict
 
 from five import grok
+import zc.async
 from zc.async import interfaces as zai
 from plone.app.async.interfaces import IAsyncService
 from plone.app.async.service import _executeAsUser
 from Products.statusmessages.interfaces import IStatusMessage
+import transaction
 
 from collective.cron import interfaces as i
 from collective.cron import events as e
@@ -159,6 +161,12 @@ class BackendJobManager(grok.Adapter):
                 present = True
         return present
 
+    def remove_all_jobs(self):
+    	for job in self.queue:
+            self.log.info('Removing this job : %s' % repr(job))
+            self.queue.remove(job)
+
+
     def remove_jobs(self, job_infos=None):
         if job_infos is None:
             job_infos = self.get_job_infos()
@@ -201,12 +209,30 @@ class BackendJobManager(grok.Adapter):
         if not (db, ppath) in infos[MANAGE_KEY]['plone']:
             infos[MANAGE_KEY]['plone'].append((db, ppath))
 
-class run_job(grok.View):
+class remove_all_jobs(grok.View):
     grok.context(i.IBackend)
     def render(self):
         messages = IStatusMessage(self.request)
         try:
             a = i.IBackendJobManager(self.context)
+            a.remove_all_jobs()
+            messages.addStatusMessage(_( u"Jobs removed", ), type="info")
+            transaction.commit()
+        except Exception, ex:
+            messages.addStatusMessage(
+                _(u"Job failed to be queued: ${ex}", mapping={"ex":ex}),
+                type="error"
+            )
+        return self.response.redirect(
+            self.context.absolute_url()
+        )
+
+class run_job(grok.View):
+    grok.context(i.IBackend)
+    def render(self):
+        messages = IStatusMessage(self.request)
+        try:
+            manager = a = i.IBackendJobManager(self.context)
             job = a.register_job(force=True)
             messages.addStatusMessage(_( u"Job queued", ), type="info")
         except Exception, ex:
@@ -217,6 +243,26 @@ class run_job(grok.View):
         return self.response.redirect(
             self.context.absolute_url()
         )
+
+class recover(grok.View):
+    grok.context(i.IBackend)
+    def render(self):
+        messages = IStatusMessage(self.request)
+        try:
+            manager = i.IBackendJobManager(self.context)
+            if manager.queue._length.value == 0:
+                manager.queue._length.change(1)
+            transaction.commit()
+            messages.addStatusMessage(( u"Job queued", ), type="info")
+        except Exception, ex:
+            messages.addStatusMessage(
+                _(u"Job failed to be queued: ${ex}", mapping={"ex":ex}),
+                type="error"
+            )
+        return self.response.redirect(
+            self.context.absolute_url()
+        )
+
 
 class activate_job(grok.View):
     grok.context(i.IBackend)

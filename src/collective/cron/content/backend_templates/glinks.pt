@@ -7,8 +7,18 @@
   </li>
   <li tal:condition="context/activated">
     <a tal:attributes="href string:@@deactivate_job" i18n:translate="">De activate the scheduled jobs</a>
-  </li> 
+  </li>
+  <li tal:condition="context/activated">
+    <a tal:attributes="href string:@@remove_all_jobs" i18n:translate="">De activate all zcasync jobs</a>
+  </li>
+  <li tal:condition="context/activated">
+    <a tal:attributes="href string:@@recover" i18n:translate="">Reset the async queue lenth</a>
+  </li>
+  <li tal:condition="context/activated">
+    <a tal:attributes="href string:@@remove_all_jobs" i18n:translate="">Remove all jobs</a>
+  </li>
+
   <li tal:condition="not:context/activated">
     <a tal:attributes="href string:@@activate_job" i18n:translate="">Activate the backend job</a>
-  </li>     
+  </li>
 </tal:t>
