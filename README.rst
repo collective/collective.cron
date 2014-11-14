@@ -114,7 +114,7 @@ Cron
 ----
 The major attributes for a cron are:
 
-    - **name**: will be the queried name to search jobs
+    - **name**: will be the queried name to search jobs. Via adaption or traversal.
     - **periodicity**: give the next time execution
     - **environ**: An optionnal jsonencoded mapping of values which will be given to the task
     - **logs_limit**: logs to keep (default : 5, limit : 25)
@@ -174,11 +174,12 @@ When a cronjob is registered, the job queued is a cron jobrunner wrapper respons
 
 JobRunner
 ---------
-A cron jobrunner is a named adapter which:
+A cron jobrunner is either a named adapter which:
     - adapts the plonesite and the current cron
     - implements IJobRunbner, and specially defines a **run** method.
+or is a traversal script which takes no paramaters
 
-A base class exists in collective cron, just inherit from it.
+For adapter based Runners a base class exists in collective cron, just inherit from it.
 This is a complicated definition to have a class like this::
 
     from collective.cron import crontab
@@ -191,6 +192,9 @@ Registered in zcml like that::
     <adapter factory=".module.MyCronJob" name="mycronjob"/>
 
 And then, you will have to register a cron called ``mycronjob`` in your plonesite.
+
+For PythonScript based runners give your cron a name which is the relative path of
+your script to the portal base.
 
 Queue manager
 -------------

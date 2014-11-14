@@ -97,8 +97,12 @@ def runJob(context, cron):
             if cron.activated and cron.crontab.activated:
                 adapter = queryMultiAdapter(
                     (context, cron), IJobRunner, name=cron.name)
-                if adapter is not None:
-                    ret = adapter.run()
+                runner = lambda: adapter.run()
+                if adapter is None:
+                    #lookup and see if its a path to a script instead
+                    runner = context.restrictedTraverse(cron.name.encode('ascii'), default=None)
+                if runner is not None:
+                    ret = runner()
                     if ret is not None:
                         if not isinstance(ret, list):
                             ret = [ret]
