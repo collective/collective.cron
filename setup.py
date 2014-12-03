@@ -52,6 +52,7 @@ setup(
         'pytz',
         'ordereddict',
         'z3c.autoinclude',
+        'setuptools', # Redundant, removes warning
         # -*- Extra requirements: -*-
     ],
     entry_points="""
