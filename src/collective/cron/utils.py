@@ -13,7 +13,11 @@ import shutil
 from AccessControl.SecurityManagement import newSecurityManager
 from zope.testbrowser import browser
 
+from contextlib import contextmanager
 from croniter import croniter as baseT
+
+from ZPublisher.HTTPRequest import HTTPRequest
+from ZPublisher.HTTPResponse import HTTPResponse
 
 D = os.path.dirname
 J = os.path.join
@@ -177,5 +181,26 @@ def asbool(value):
     if value == -1:
         return False
     return bool(value)
+
+
+@contextmanager
+def context_with_request(context, cron):
+    # Create a request to work with
+    response = HTTPResponse(stdout=sys.stdout)
+
+    # Set up the request environment
+    env = cron.environ.get('REQUEST', {})
+
+    # Required environment variables
+    if 'SERVER_NAME' not in env:
+        env['SERVER_NAME'] = 'localhost'
+    if 'SERVER_PORT' not in env:
+        env['SERVER_PORT'] = '80'
+
+    request = HTTPRequest(sys.stdin, env, response)
+    context.REQUEST = request
+
+    yield context
+    del context.REQUEST
 
 # vim:set et sts=4 ts=4 tw=80:
