@@ -11,6 +11,7 @@ import time
 import shutil
 
 from AccessControl.SecurityManagement import newSecurityManager
+from zope.site.hooks import getSite, setSite
 from zope.testbrowser import browser
 
 from contextlib import contextmanager
@@ -187,7 +188,12 @@ def context_with_request(context, cron):
     # Get the request environment
     env = cron.environ.get('REQUEST', {})
 
+    oldsite = getSite()
     # Use makerequest to set up the request properly
-    yield makerequest(context, environ=env)
+    context = makerequest(context, environ=env)
+    setSite(context)
+    yield context
+
+    setSite(oldsite)
 
 # vim:set et sts=4 ts=4 tw=80:
