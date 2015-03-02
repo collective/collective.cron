@@ -1,3 +1,4 @@
+from Products.PythonScripts.tests.testPythonScript import VerifiedPythonScript
 import transaction
 import unittest2 as unittest
 import datetime
@@ -78,9 +79,23 @@ class JobRunnerTest(base.IntegrationTestCase):
         _started[:] = []
         [self.queue.remove(j) for j in self.queue]
 
+        #remove any leftover pythonscripts
+#        for id in self.portal.objectIds(['Script (Python)']):
+#            self.portal.manage_delObjects([id])
+
     def get_adp(self, cron):
         return queryMultiAdapter((self.portal, cron),
                           i.IJobRunner, name=cron.name)
+
+    def _newPS(self, txt, bind=None):
+        ps = VerifiedPythonScript('ps')
+        ps.ZBindings_edit(bind or {})
+        ps.write(txt)
+        ps._makeFunction()
+        if ps.errors:
+            raise SyntaxError, ps.errors[0]
+        return ps
+
 
     def test_crontab_runjob_event(self):
         # a job withtout any utility attached must run as NOTRUN
@@ -180,6 +195,80 @@ class JobRunnerTest(base.IntegrationTestCase):
         self.cron.name = u'testcron'
         self.cron.save() 
         transaction.commit()
+
+    def test_crontab_runjob_pathrun(self):
+        # a job withtout any utility attached must run as NOTRUN
+        # even if it is a NOOP
+        [self.layer['queue'].remove(a) for a in self.layer['queue']]
+        self.cron.name = u'testjobrunnercron_path'
+        self.cron.save()
+        ret = runJob(self.portal, self.cron)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron_path')[0].logs[0].status, 3)
+        #
+        # don't register adapter. Instead create simple python script and cron.name path to script
+        #
+        txt = "context.result.append(1)"
+        ps = self._newPS(txt, {'name_context': 'context'})
+        # zope can't create use unicode ids
+        self.portal[self.cron.name.encode('ascii')] = ps
+        self.portal.result = []
+
+        transaction.commit()
+        ret = runJob(self.portal, self.cron)
+        self.assertEquals(
+            ret,
+            (1, [], self.cron.uid, ('', 'plone')))
+        self.assertEquals(self.portal.result, [1])
+        transaction.commit()
+
+        #
+        # same with logs
+        #
+        txt = "context.result.append(context.result[-1]+1); return 'warn'"
+        self.portal._getOb(self.cron.name.encode('ascii')).write(txt)
+        transaction.commit()
+        ret = runJob(self.portal, self.cron)
+        self.assertEquals(
+            ret,
+            (2, [u'warn'], self.cron.uid, ('', 'plone')))
+        self.assertEquals(self.portal.result, [1, 2])
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron_path')[0].logs[0].status, 2)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron_path')[0].logs[0].messages, [u'warn'])
+        transaction.commit()
+
+        #
+        # register an adapter with trivial code
+        # which raise a failure
+        #
+        txt = "raise Exception('foo')"
+        self.portal._getOb(self.cron.name.encode('ascii')).write(txt)
+        transaction.commit()
+        ret = runJob(self.portal, self.cron)
+        self.assertEquals(
+            ret,
+            (0, [u'foo'], self.cron.uid, ('', 'plone')))
+        transaction.commit()
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron_path')[0].logs[0].status, 0)
+        self.assertEquals(Crontab.load().by_name('testjobrunnercron_path')[0].logs[0].messages, [u'foo'])
+
+        #
+        # add a script to a folder
+        #
+        txt = "context.result.append(context.result[-1]+1)"
+        ps = self._newPS(txt, {'name_context': 'context'})
+        self.portal['test-folder']['test_in_folder'] = ps
+        self.cron.name = u'test-folder/test_in_folder'
+        self.cron.save()
+        ret = runJob(self.portal, self.cron)
+        transaction.commit()
+        self.assertEquals(
+            ret,
+            (1, [], self.cron.uid, ('', 'plone')))
+        self.assertEquals(self.portal.result, [1, 2, 3])
+        transaction.commit()
+        self.assertEquals(Crontab.load().by_name('test-folder/test_in_folder')[0].logs[0].status, 1)
+
+
 
 def test_suite():
     return unittest.defaultTestLoader.loadTestsFromName(__name__)
