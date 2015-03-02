@@ -11,9 +11,13 @@ import time
 import shutil
 
 from AccessControl.SecurityManagement import newSecurityManager
+from zope.site.hooks import getSite, setSite
 from zope.testbrowser import browser
 
+from contextlib import contextmanager
 from croniter import croniter as baseT
+
+from Testing.makerequest import makerequest
 
 D = os.path.dirname
 J = os.path.join
@@ -177,5 +181,19 @@ def asbool(value):
     if value == -1:
         return False
     return bool(value)
+
+
+@contextmanager
+def context_with_request(context, cron):
+    # Get the request environment
+    env = cron.environ.get('REQUEST', {})
+
+    oldsite = getSite()
+    # Use makerequest to set up the request properly
+    context = makerequest(context, environ=env)
+    setSite(context)
+    yield context
+
+    setSite(oldsite)
 
 # vim:set et sts=4 ts=4 tw=80:
