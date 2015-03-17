@@ -185,14 +185,23 @@ def asbool(value):
 
 @contextmanager
 def context_with_request(context, cron):
-    # Get the request environment
-    env = cron.environ.get('REQUEST', {})
-
     oldsite = getSite()
-    # Use makerequest to set up the request properly
-    context = makerequest(context, environ=env)
-    setSite(context)
-    yield context
+    context_path = '/'.join(context.getPhysicalPath())
+
+    # Get the request environment
+    env = cron.environ.get('REQUEST', {}).copy()
+
+    # Use makerequest to set up a fake request. Do this from the ZODB root
+    # so everything gets set up properly
+    app = context.unrestrictedTraverse('/')
+    app = makerequest(app, environ=env)
+
+    # Traverse to the context and configure the REQUEST
+    newcontext = app.unrestrictedTraverse(context_path)
+    newcontext.REQUEST['PARENTS'] = [newcontext]
+    newcontext.REQUEST.setVirtualRoot('')
+    setSite(newcontext)
+    yield newcontext
 
     setSite(oldsite)
 
