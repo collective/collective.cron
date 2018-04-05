@@ -5,7 +5,7 @@ Changelog
 2.8 (unreleased)
 ----------------
 
-- Improve how fake request works [dmarks]
+- Add a fake request so code called that expects a request will still work [dmarks]
 - Allow python scripts and other TTW code to be called from collective.cron [djay]
 
 
