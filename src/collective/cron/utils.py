@@ -11,9 +11,13 @@ import time
 import shutil
 
 from AccessControl.SecurityManagement import newSecurityManager
+from zope.site.hooks import getSite, setSite
 from zope.testbrowser import browser
 
+from contextlib import contextmanager
 from croniter import croniter as baseT
+
+from Testing.makerequest import makerequest
 
 D = os.path.dirname
 J = os.path.join
@@ -177,5 +181,28 @@ def asbool(value):
     if value == -1:
         return False
     return bool(value)
+
+
+@contextmanager
+def context_with_request(context, cron):
+    oldsite = getSite()
+    context_path = '/'.join(context.getPhysicalPath())
+
+    # Get the request environment
+    env = cron.environ.get('REQUEST', {}).copy()
+
+    # Use makerequest to set up a fake request. Do this from the ZODB root
+    # so everything gets set up properly
+    app = context.unrestrictedTraverse('/')
+    app = makerequest(app, environ=env)
+
+    # Traverse to the context and configure the REQUEST
+    newcontext = app.unrestrictedTraverse(context_path)
+    newcontext.REQUEST['PARENTS'] = [newcontext]
+    newcontext.REQUEST.setVirtualRoot('')
+    setSite(newcontext)
+    yield newcontext
+
+    setSite(oldsite)
 
 # vim:set et sts=4 ts=4 tw=80:

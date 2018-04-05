@@ -5,7 +5,8 @@ Changelog
 2.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Add a fake request so code called that expects a request will still work [dmarks]
+- Allow python scripts and other TTW code to be called from collective.cron [djay]
 
 
 2.7 (2013-02-18)

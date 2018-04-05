@@ -48,6 +48,7 @@ from collective.cron.interfaces import (
     ICronManager,
 )
 from collective.cron.utils import asbool
+from collective.cron.utils import context_with_request
 from Products.CMFPlone.interfaces.siteroot import IPloneSiteRoot
 
 class NoSuchCron(Exception):pass
@@ -95,23 +96,24 @@ def runJob(context, cron):
         try:
             notify(e.StartedCronJobEvent(context, cron))
             if cron.activated and cron.crontab.activated:
-                adapter = queryMultiAdapter(
-                    (context, cron), IJobRunner, name=cron.name)
-                runner = lambda: adapter.run()
-                if adapter is None:
-                    #lookup and see if its a path to a script instead
-                    runner = context.restrictedTraverse(cron.name.encode('ascii'), default=None)
-                if runner is not None:
-                    ret = runner()
-                    if ret is not None:
-                        if not isinstance(ret, list):
-                            ret = [ret]
-                        messages.extend(ret)
-                    status = find_term(job_status, 'OK').value
-                    # if we have had messages without exceptions, those
-                    # are just warnings or pieces of information
-                    if len(messages):
-                        status = find_term(job_status, 'WARN').value
+                with context_with_request(context, cron) as context:
+                    adapter = queryMultiAdapter(
+                        (context, cron), IJobRunner, name=cron.name)
+                    runner = lambda: adapter.run()
+                    if adapter is None:
+                        #lookup and see if its a path to a script instead
+                        runner = context.restrictedTraverse(cron.name.encode('ascii'), default=None)
+                    if runner is not None:
+                        ret = runner()
+                        if ret is not None:
+                            if not isinstance(ret, list):
+                                ret = [ret]
+                            messages.extend(ret)
+                        status = find_term(job_status, 'OK').value
+                        # if we have had messages without exceptions, those
+                        # are just warnings or pieces of information
+                        if len(messages):
+                            status = find_term(job_status, 'WARN').value
             notify(e.FinishedCronJobEvent(context, cron))
         except Exception, ex:
             messages.append('%s' % ex)
